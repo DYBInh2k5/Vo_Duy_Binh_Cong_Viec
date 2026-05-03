@@ -22,7 +22,7 @@ This document tracks the evolution of the coDY Portfolio project from its initia
     - AI Video Generation Studio
     - Neural Network Monitor
     - Cyber-Physical Security Interface.
-- **Assets:** Successfully integrated the user-provided profile picture (`/profile_cody.jpg`) and moved it to the standard `public/` directory for production serving.
+- **Assets:** Successfully integrated the user-provided profile picture (`/profile_cody.png`) and moved it to the standard `public/` directory for production serving.
 - **Identity:** Updated `PERSONAL_INFO` constant with correct LinkedIn links and Vietnamese social media handles.
 
 ## 2026-05-03: Version 1.0.0
