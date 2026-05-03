@@ -4,6 +4,7 @@ import { db } from '../lib/firebase';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Calendar, Tag, ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface BlogPost {
   id: string;
@@ -15,6 +16,7 @@ interface BlogPost {
 }
 
 const Blog = () => {
+  const { t } = useTranslation();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -56,7 +58,7 @@ const Blog = () => {
           </div>
         ) : posts.length === 0 ? (
           <div className="p-20 border-4 border-dashed border-black text-center bg-white">
-            <p className="text-2xl font-black uppercase">No articles published yet.</p>
+            <p className="text-2xl font-black uppercase">{t('common.noEntries')}</p>
             <p className="mt-2">Check back soon for insights on AI engineering.</p>
           </div>
         ) : (
@@ -87,7 +89,7 @@ const Blog = () => {
                     to={`/blog/${post.id}`}
                     className="inline-flex items-center gap-2 text-sm font-black uppercase border-b-2 border-bauhaus-red pb-1 hover:gap-4 transition-all"
                   >
-                    Read Full Post <ChevronRight size={16} />
+                    {t('common.readFullPost')} <ChevronRight size={16} />
                   </Link>
                 </div>
               </motion.article>

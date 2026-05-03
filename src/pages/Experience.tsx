@@ -2,19 +2,21 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { EXPERIENCE } from '../constants';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const Experience = () => {
+  const { t } = useTranslation();
   return (
     <div className="max-w-7xl mx-auto px-8 pt-24 pb-24">
       {/* Hero Section */}
       <header className="mb-20 md:mb-32">
         <h1 className="text-5xl sm:text-7xl md:text-9xl lg:text-[120px] leading-[0.9] font-black text-black uppercase mb-8 tracking-[-0.04em]">
-          EXPERIENCE<br />PATH
+          {t('experience.hero').split('\n')[0]}<br />{t('experience.hero').split('\n')[1]}
         </h1>
         <div className="w-full md:w-1/2 flex items-center gap-4">
           <div className="h-10 w-10 md:h-12 md:w-12 bg-bauhaus-red border-4 border-black shrink-0"></div>
           <p className="text-lg md:text-xl font-bold max-w-lg text-bauhaus-black/80 leading-relaxed">
-            A non-linear progression of creative engineering, architectural code, and structural problem solving.
+            {t('experience.subtitle')}
           </p>
         </div>
       </header>
@@ -89,7 +91,7 @@ const Experience = () => {
       <section className="mt-40 bg-bauhaus-red border-4 border-black p-12 hard-shadow flex flex-col md:flex-row items-center justify-between gap-12 group">
         <div className="max-w-xl">
           <h2 className="text-6xl font-black text-white mb-6 uppercase leading-none tracking-tighter">
-            READY TO BUILD?
+            {t('common.readyToBuild')}
           </h2>
           <p className="text-xl font-bold text-white/90 leading-relaxed">
             Let's collaborate on structures that defy standard conventions. Functional art for the modern web.
@@ -100,7 +102,7 @@ const Experience = () => {
             to="/contact"
             className="bg-white text-black border-4 border-black px-10 py-5 font-black uppercase tracking-widest hover:bg-bauhaus-yellow transition-all active:translate-x-1 active:translate-y-1 active:shadow-none"
           >
-            Get In Touch
+            {t('common.getInTouch')}
           </Link>
         </div>
       </section>

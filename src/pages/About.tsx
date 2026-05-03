@@ -2,14 +2,16 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { PERSONAL_INFO } from '../constants';
 import { Terminal, Layout, Zap, Database, Brush, Accessibility, DraftingCompass, Brain, Shield, Rocket, Globe } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const About = () => {
+  const { t } = useTranslation();
   return (
     <div className="max-w-7xl mx-auto px-8 pt-24 pb-24">
       {/* Hero Section */}
       <header className="mb-16 md:mb-24">
         <h1 className="text-5xl sm:text-7xl md:text-9xl lg:text-[120px] leading-[0.9] font-black text-black uppercase mb-8 tracking-[-0.04em]">
-          VÕ DUY BÌNH<br />(coDY)
+          {t('about.hero').split('\n')[0]}<br />{t('about.hero').split('\n')[1]}
         </h1>
         <div className="w-full h-1 bg-black"></div>
       </header>
@@ -36,19 +38,18 @@ const About = () => {
           <section className="bg-bauhaus-off-white border-4 border-black p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-8 h-8 bg-bauhaus-red border-2 border-black"></div>
-              <h2 className="text-3xl font-black uppercase tracking-tighter">Profile Protocol</h2>
+              <h2 className="text-3xl font-black uppercase tracking-tighter">{t('about.profileProtocol')}</h2>
             </div>
             <div className="space-y-4">
               <p className="text-xl font-bold leading-relaxed">
-                I am <span className="text-bauhaus-red">Võ Duy Bình</span>, a Software Technology student at <span className="underline decoration-4 decoration-bauhaus-yellow">Hoa Sen University</span>. 
-                Integrating technical engineering with creative automation, I redefine the boundaries of digital architecture.
+                {t('about.intro')}
               </p>
               <div className="grid grid-cols-2 gap-4 text-sm font-black uppercase tracking-widest pt-4">
                 <div className="border-l-4 border-bauhaus-blue pl-4">
-                  <span className="text-bauhaus-black/40">Location:</span><br />{PERSONAL_INFO.location}
+                  <span className="text-bauhaus-black/40">{t('about.location')}:</span><br />{PERSONAL_INFO.location}
                 </div>
                 <div className="border-l-4 border-bauhaus-red pl-4">
-                  <span className="text-bauhaus-black/40">Birth:</span><br />{PERSONAL_INFO.birthday}
+                  <span className="text-bauhaus-black/40">{t('about.birth')}:</span><br />{PERSONAL_INFO.birthday}
                 </div>
               </div>
             </div>
@@ -57,16 +58,16 @@ const About = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Philosophy */}
             <section className="bg-bauhaus-yellow border-4 border-black p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-              <h3 className="font-black uppercase border-b-2 border-black pb-2 mb-4 tracking-widest text-xs">Phòng Thái</h3>
+              <h3 className="font-black uppercase border-b-2 border-black pb-2 mb-4 tracking-widest text-xs">{t('about.philosophyTitle')}</h3>
               <p className="text-md font-bold uppercase tracking-tight">
-                Reduction to the essence. Grid-first structures. Transforming complex patterns into functional clarity.
+                {t('about.philosophy')}
               </p>
             </section>
             {/* Goals */}
             <section className="bg-bauhaus-blue text-white border-4 border-black p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-              <h3 className="font-black uppercase border-b-2 border-white pb-2 mb-4 tracking-widest text-xs">Mục Tiêu</h3>
+              <h3 className="font-black uppercase border-b-2 border-white pb-2 mb-4 tracking-widest text-xs">{t('about.goalsTitle')}</h3>
               <p className="text-md italic font-bold uppercase">
-                To build cross-platform ecosystems using AI, code, and structural marketing strategies.
+                {t('about.goals')}
               </p>
             </section>
           </div>
@@ -76,7 +77,7 @@ const About = () => {
       {/* Expertise Section */}
       <div className="mt-32 border-4 border-black p-12 bg-bauhaus-black text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-bauhaus-red/20 -mr-32 -mt-32 rounded-full blur-3xl"></div>
-        <h2 className="text-5xl font-black uppercase mb-12 tracking-tighter relative z-10">Neural & Technical Stack</h2>
+        <h2 className="text-5xl font-black uppercase mb-12 tracking-tighter relative z-10">{t('about.stackTitle')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative z-10">
           <div className="space-y-6">
             <h4 className="text-bauhaus-yellow font-black uppercase tracking-[0.2em] text-sm">Engineering</h4>

@@ -4,8 +4,6 @@ import { MessageSquare, X, Send, Bot, User } from 'lucide-react';
 import { GoogleGenAI } from '@google/genai';
 import { PROJECTS, EXPERIENCE, PERSONAL_INFO } from '../constants';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
 const AIAssistant = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<{ role: 'user' | 'assistant', content: string }[]>([
@@ -30,6 +28,12 @@ const AIAssistant = () => {
     setIsLoading(true);
 
     try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error("GEMINI_API_KEY is not configured.");
+      }
+      const ai = new GoogleGenAI({ apiKey });
+      
       const systemInstruction = `
         You are coDY's professional AI Assistant. Your goal is to represent him and answer questions about his portfolio.
         
@@ -67,7 +71,7 @@ const AIAssistant = () => {
       setMessages(prev => [...prev, { role: 'assistant', content: aiResponse }]);
     } catch (error) {
       console.error(error);
-      setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I'm having trouble connecting right now." }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I'm having trouble connecting right now. Please ensure the Gemini API key is set." }]);
     } finally {
       setIsLoading(false);
     }

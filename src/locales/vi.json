@@ -7,7 +7,8 @@
     "capabilities": "Kỹ năng",
     "playground": "Sáng tạo",
     "contact": "Liên hệ",
-    "blog": "Blog"
+    "blog": "Blog",
+    "admin": "Quản trị"
   },
   "hero": {
     "title": "NHÀ THIẾT KẾ & KỸ SƯ",
@@ -16,6 +17,28 @@
   "common": {
     "viewProject": "Xem dự án",
     "contactMe": "Liên hệ với tôi",
-    "learnMore": "Tìm hiểu thêm"
+    "learnMore": "Tìm hiểu thêm",
+    "backToBlog": "Quay lại Blog",
+    "readFullPost": "Đọc bài viết",
+    "loading": "Đang tải...",
+    "noEntries": "Không tìm thấy dữ liệu.",
+    "getInTouch": "Liên hệ ngay",
+    "readyToBuild": "BẮT ĐẦU DỰ ÁN?"
+  },
+  "about": {
+    "hero": "VÕ DUY BÌNH\n(coDY)",
+    "profileProtocol": "Hồ sơ cá nhân",
+    "intro": "Tôi là Võ Duy Bình, sinh viên ngành Công nghệ phần mềm tại Đại học Hoa Sen. Kết hợp kỹ thuật lập trình với tự động hóa sáng tạo, tôi tái định nghĩa ranh giới của kiến trúc kỹ thuật số.",
+    "location": "Vị trí",
+    "birth": "Ngày sinh",
+    "philosophyTitle": "Triết lý",
+    "philosophy": "Tinh giản đến cốt lõi. Cấu trúc dựa trên hệ thống lưới. Chuyển đổi các mô hình phức tạp thành sự rõ ràng về chức năng.",
+    "goalsTitle": "Mục tiêu",
+    "goals": "Xây dựng hệ sinh thái đa nền tảng sử dụng AI, mã nguồn và các chiến lược marketing cấu trúc.",
+    "stackTitle": "Nền tảng kỹ thuật & AI"
+  },
+  "experience": {
+    "hero": "LỘ TRÌNH\nKINH NGHIỆM",
+    "subtitle": "Một sự tiến triển không tuyến tính của kỹ thuật sáng tạo, mã kiến trúc và giải quyết vấn đề cấu trúc."
   }
 }

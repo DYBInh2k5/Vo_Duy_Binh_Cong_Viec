@@ -5,6 +5,7 @@ import { db } from '../lib/firebase';
 import Markdown from 'react-markdown';
 import { motion } from 'motion/react';
 import { ArrowLeft, Calendar, User, Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface BlogPost {
   title: string;
@@ -16,6 +17,7 @@ interface BlogPost {
 }
 
 const BlogPost = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [post, setPost] = useState<BlogPost | null>(null);
@@ -60,7 +62,7 @@ const BlogPost = () => {
           onClick={() => navigate('/blog')}
           className="flex items-center gap-2 font-black uppercase text-sm mb-12 hover:gap-4 transition-all"
         >
-          <ArrowLeft size={20} /> Back to Blog
+          <ArrowLeft size={20} /> {t('common.backToBlog')}
         </button>
 
         <motion.article

@@ -7,7 +7,8 @@
     "capabilities": "Capabilities",
     "playground": "Playground",
     "contact": "Contact",
-    "blog": "Blog"
+    "blog": "Blog",
+    "admin": "Admin"
   },
   "hero": {
     "title": "DESIGNER & ENGINEER",
@@ -16,6 +17,28 @@
   "common": {
     "viewProject": "View Project",
     "contactMe": "Contact Me",
-    "learnMore": "Learn More"
+    "learnMore": "Learn More",
+    "backToBlog": "Back to Blog",
+    "readFullPost": "Read Full Post",
+    "loading": "Loading...",
+    "noEntries": "No entries found.",
+    "getInTouch": "Get In Touch",
+    "readyToBuild": "READY TO BUILD?"
+  },
+  "about": {
+    "hero": "VÕ DUY BÌNH\n(coDY)",
+    "profileProtocol": "Profile Protocol",
+    "intro": "I am Võ Duy Bình, a Software Technology student at Hoa Sen University. Integrating technical engineering with creative automation, I redefine the boundaries of digital architecture.",
+    "location": "Location",
+    "birth": "Birth",
+    "philosophyTitle": "Philosophy",
+    "philosophy": "Reduction to the essence. Grid-first structures. Transforming complex patterns into functional clarity.",
+    "goalsTitle": "Goals",
+    "goals": "To build cross-platform ecosystems using AI, code, and structural marketing strategies.",
+    "stackTitle": "Neural & Technical Stack"
+  },
+  "experience": {
+    "hero": "EXPERIENCE\nPATH",
+    "subtitle": "A non-linear progression of creative engineering, architectural code, and structural problem solving."
   }
 }
