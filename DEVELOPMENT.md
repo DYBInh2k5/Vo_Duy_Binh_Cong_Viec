@@ -2,7 +2,12 @@
 
 This document tracks the evolution of the coDY Portfolio project from its initial generation to its current state.
 
-## 2026-05-03: Version 1.2.0 (Current)
+## 2026-05-03: Version 1.3.0 (Current)
+### Updates
+- **Deployment Prep:** Added `vercel.json` to handle SPA routing (rewrites to `index.html`). This ensures that deep links (e.g., `/projects`, `/experience`) work correctly when deployed to Vercel.
+- **Documentation:** Updated `DEVELOPMENT.md` to version 1.3.0.
+
+## 2026-05-03: Version 1.2.0
 ### Updates
 - **Experience Overhaul:** Replaced generic placeholder experience with real career history:
     - AI Engineer Intern (Jan 2026 - Present)
