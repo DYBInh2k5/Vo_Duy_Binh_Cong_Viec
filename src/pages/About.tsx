@@ -25,7 +25,6 @@ const About = () => {
               alt="Võ Duy Bình (coDY) Portrait" 
               className="w-full grayscale contrast-125 block hover:grayscale-0 transition-all duration-700" 
               src={PERSONAL_INFO.profileImage}
-              referrerPolicy="no-referrer"
             />
           </div>
           {/* Bauhaus Geometric Element */}

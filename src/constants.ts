@@ -161,7 +161,7 @@ export const PERSONAL_INFO = {
   education: "Software Technology, Hoa Sen University",
   languages: ["Vietnamese (Native)", "English (IELTS 6.0 / TOEIC 650)", "Chinese (HSK 3)", "Japanese (JLPT N5)", "Korean (TOPIK 1)"],
   email: "binh.vd01500@sinhvien.hoasen.edu.vn",
-  profileImage: "/profile_cody.png",
+  profileImage: "/profile_cody.jpg",
   socials: {
     github: "https://github.com/DYBInh2k5",
     linkedin: "https://www.linkedin.com/in/b%C3%ACnh-v%C3%B5-duy-5a9891308/",

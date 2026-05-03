@@ -17,7 +17,7 @@ This document outlines the technical architecture and organization of the coDY P
 ```text
 /
 ├── public/                 # Static assets (images, favicon)
-│   └── profile_cody.png    # Main profile picture
+│   └── profile_cody.jpg    # Main profile picture
 ├── src/
 │   ├── components/         # Reusable UI components
 │   │   ├── Navbar.tsx      # Global navigation
