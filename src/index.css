@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Epilogue:wght@400;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Epilogue", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Epilogue", ui-sans-serif, system-ui, sans-serif;
+
+  --color-bauhaus-red: #D02020;
+  --color-bauhaus-blue: #2850CE;
+  --color-bauhaus-yellow: #FFD700;
+  --color-bauhaus-off-white: #FCF9F8;
+  --color-bauhaus-black: #1C1B1B;
+}
+
+@layer base {
+  body {
+    @apply bg-bauhaus-off-white text-bauhaus-black font-sans antialiased;
+    background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+}
+
+@layer components {
+  .hard-shadow {
+    box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
+  }
+  .hard-shadow-lg {
+    box-shadow: 8px 8px 0px 0px rgba(0,0,0,1);
+  }
+  .grayscale-hover {
+    @apply grayscale hover:grayscale-0 transition-all duration-300;
+  }
+}
