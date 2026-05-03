@@ -11,6 +11,10 @@ const Playground = React.lazy(() => import('./pages/Playground'));
 const Capabilities = React.lazy(() => import('./pages/Capabilities'));
 const Experience = React.lazy(() => import('./pages/Experience'));
 const Contact = React.lazy(() => import('./pages/Contact'));
+const Blog = React.lazy(() => import('./pages/Blog'));
+const BlogPost = React.lazy(() => import('./pages/BlogPost'));
+const Admin = React.lazy(() => import('./pages/Admin'));
+const AIAssistant = React.lazy(() => import('./components/AIAssistant'));
 
 function App() {
   return (
@@ -31,10 +35,16 @@ function App() {
               <Route path="/capabilities" element={<Capabilities />} />
               <Route path="/experience" element={<Experience />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:id" element={<BlogPost />} />
+              <Route path="/admin" element={<Admin />} />
             </Routes>
           </Suspense>
         </main>
         <Footer />
+        <Suspense fallback={null}>
+          <AIAssistant />
+        </Suspense>
       </div>
     </Router>
   );

@@ -1,12 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { PROJECTS as ALL_PROJECTS } from '../constants';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Star, ArrowRight } from 'lucide-react';
+import { Star, ArrowRight, Github, ExternalLink, GitBranch, RefreshCw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const Projects = () => {
+  const { t } = useTranslation();
   const [filter, setFilter] = React.useState('ALL');
+  const [repos, setRepos] = useState<any[]>([]);
+  const [reposLoading, setReposLoading] = useState(true);
   const categories = ['ALL', 'AI', 'WEB', 'MOBILE'];
+
+  useEffect(() => {
+    const fetchRepos = async () => {
+      try {
+        const response = await fetch('https://api.github.com/users/DYBInh2k5/repos?sort=updated&per_page=6');
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setRepos(data);
+        }
+      } catch (error) {
+        console.error("Github API Error:", error);
+      } finally {
+        setReposLoading(false);
+      }
+    };
+    fetchRepos();
+  }, []);
 
   const filteredProjects = filter === 'ALL' 
     ? ALL_PROJECTS 
@@ -17,7 +38,7 @@ const Projects = () => {
       {/* Header */}
       <header className="mb-lg">
         <h1 className="text-5xl sm:text-7xl md:text-9xl lg:text-[120px] leading-[0.9] font-black text-bauhaus-black mb-md tracking-[-0.04em] uppercase">
-          SHOWCASE
+          {t('nav.projects')}
         </h1>
         
         {/* Filters */}
@@ -106,6 +127,49 @@ const Projects = () => {
             );
           })}
         </AnimatePresence>
+      </div>
+
+      {/* Github Repos Section */}
+      <div className="mt-24">
+        <div className="flex items-center gap-4 mb-12">
+          <Github size={48} className="text-bauhaus-black" />
+          <h2 className="text-4xl sm:text-6xl font-black uppercase tracking-tighter">Live Repository Feed</h2>
+        </div>
+
+        {reposLoading ? (
+          <div className="flex justify-center p-20">
+            <RefreshCw className="animate-spin text-bauhaus-blue" size={32} />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {repos.map((repo, i) => (
+              <motion.a
+                key={repo.id}
+                href={repo.html_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: i * 0.05 }}
+                className="bg-bauhaus-black text-white p-6 border-4 border-black hover:bg-white hover:text-black transition-all group"
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <GitBranch size={20} className="text-bauhaus-yellow" />
+                  <ExternalLink size={20} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <h3 className="text-xl font-black truncate uppercase mb-2">{repo.name}</h3>
+                <p className="text-xs opacity-60 mb-6 line-clamp-2 h-8">
+                  {repo.description || "No description provided."}
+                </p>
+                <div className="flex gap-4 text-[10px] font-black uppercase">
+                  <span>{repo.language || "Unknown"}</span>
+                  <span className="text-bauhaus-red">★ {repo.stargazers_count}</span>
+                  <span className="text-bauhaus-blue">Forks: {repo.forks_count}</span>
+                </div>
+              </motion.a>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Section Break */}

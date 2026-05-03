@@ -1,0 +1,21 @@
+{
+  "nav": {
+    "home": "Trang chủ",
+    "about": "Giới thiệu",
+    "projects": "Dự án",
+    "experience": "Kinh nghiệm",
+    "capabilities": "Kỹ năng",
+    "playground": "Sáng tạo",
+    "contact": "Liên hệ",
+    "blog": "Blog"
+  },
+  "hero": {
+    "title": "NHÀ THIẾT KẾ & KỸ SƯ",
+    "subtitle": "KẾT NỐI KHOẢNG CÁCH GIỮA TRỰC GIÁC CON NGƯỜI VÀ TRÍ TUỆ MÁY TÍNH."
+  },
+  "common": {
+    "viewProject": "Xem dự án",
+    "contactMe": "Liên hệ với tôi",
+    "learnMore": "Tìm hiểu thêm"
+  }
+}

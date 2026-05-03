@@ -2,8 +2,10 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { PERSONAL_INFO } from '../constants';
 import { Mail, Phone, ArrowUpRight, AtSign, Github, Linkedin, Instagram, Facebook, Video, Music, Globe } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const Contact = () => {
+  const { t } = useTranslation();
   const [status, setStatus] = React.useState('IDLE');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -17,7 +19,7 @@ const Contact = () => {
       {/* Hero Section */}
       <section className="mb-16 md:mb-24">
         <h1 className="text-5xl sm:text-7xl md:text-9xl lg:text-[120px] leading-[0.9] font-black text-black uppercase mb-8 tracking-[-0.04em]">
-          INITIATE<br />PROTOCOL
+          {t('nav.contact')}
         </h1>
         <div className="h-4 bg-black w-full mb-2"></div>
         <div className="h-1 bg-black w-full"></div>
@@ -138,7 +140,7 @@ const Contact = () => {
                 disabled={status !== 'IDLE'}
                 className="w-full bg-bauhaus-red text-white py-6 border-4 border-black text-[32px] font-black uppercase hard-shadow hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all disabled:opacity-50"
               >
-                {status === 'IDLE' && "Execute Transmission"}
+                {status === 'IDLE' && t('common.contactMe')}
                 {status === 'TRANSMITTING' && "Transmitting..."}
                 {status === 'RECEIVED' && "Protocol Received"}
               </button>

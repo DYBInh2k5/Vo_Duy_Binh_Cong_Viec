@@ -1,0 +1,64 @@
+{
+  "entities": {
+    "Project": {
+      "title": "Project",
+      "description": "Portfolio work item",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "tagline": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
+        "tech": { "type": "array", "items": { "type": "string" } },
+        "image": { "type": "string" },
+        "link": { "type": "string" },
+        "color": { "type": "string" },
+        "order": { "type": "number" }
+      },
+      "required": ["title", "category", "image"]
+    },
+    "Experience": {
+      "title": "Work Experience",
+      "description": "Professional history item",
+      "type": "object",
+      "properties": {
+        "company": { "type": "string" },
+        "role": { "type": "string" },
+        "period": { "type": "string" },
+        "description": { "type": "string" },
+        "color": { "type": "string" },
+        "order": { "type": "number" }
+      },
+      "required": ["company", "role", "period"]
+    },
+    "BlogPost": {
+      "title": "Blog Post",
+      "description": "Article in markdown",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "excerpt": { "type": "string" },
+        "content": { "type": "string" },
+        "date": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "image": { "type": "string" },
+        "published": { "type": "boolean" }
+      },
+      "required": ["title", "content", "date"]
+    }
+  },
+  "firestore": {
+    "/projects/{projectId}": {
+      "schema": "Project",
+      "description": "Collection of portfolio projects"
+    },
+    "/experience/{experienceId}": {
+      "schema": "Experience",
+      "description": "Professional history"
+    },
+    "/blogs/{blogId}": {
+      "schema": "BlogPost",
+      "description": "Blog articles"
+    }
+  }
+}

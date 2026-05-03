@@ -1,20 +1,27 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Languages } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const Navbar = () => {
+  const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = React.useState(false);
   const location = useLocation();
 
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'en' ? 'vi' : 'en';
+    i18n.changeLanguage(newLang);
+  };
+
   const navLinks = [
-    { name: 'Home', path: '/' },
-    { name: 'Projects', path: '/projects' },
-    { name: 'Playground', path: '/playground' },
-    { name: 'Experience', path: '/experience' },
-    { name: 'Capabilities', path: '/capabilities' },
-    { name: 'About', path: '/about' },
-    { name: 'Contact', path: '/contact' },
+    { name: t('nav.home'), path: '/' },
+    { name: t('nav.projects'), path: '/projects' },
+    { name: t('nav.blog'), path: '/blog' },
+    { name: t('nav.experience'), path: '/experience' },
+    { name: t('nav.capabilities'), path: '/capabilities' },
+    { name: t('nav.about'), path: '/about' },
+    { name: t('nav.contact'), path: '/contact' },
   ];
 
   return (
@@ -41,11 +48,20 @@ const Navbar = () => {
       </div>
 
       <div className="flex items-center gap-4">
+        <button
+          onClick={toggleLanguage}
+          className="flex items-center gap-2 px-3 py-1 border-2 border-black bg-white hover:bg-bauhaus-blue hover:text-white transition-all font-bold text-xs uppercase"
+          title="Toggle Language"
+        >
+          <Languages size={14} />
+          {i18n.language.toUpperCase()}
+        </button>
+
         <Link 
           to="/contact" 
           className="hidden sm:block bg-bauhaus-red text-white px-6 py-2 border-2 border-black uppercase font-bold hard-shadow hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all active:translate-x-1 active:translate-y-1 active:shadow-none"
         >
-          Hire Me
+          {t('common.contactMe')}
         </Link>
         
         {/* Mobile menu button */}

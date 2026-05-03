@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper to check if user is signed in
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Projects: Public read, Admin write
+    match /projects/{projectId} {
+      allow read: if true;
+      allow write: if isSignedIn() && request.auth.token.email == "binhvo20055@gmail.com";
+    }
+
+    // Experience: Public read, Admin write
+    match /experience/{experienceId} {
+      allow read: if true;
+      allow write: if isSignedIn() && request.auth.token.email == "binhvo20055@gmail.com";
+    }
+
+    // Blogs: Public read (if published), Admin write
+    match /blogs/{blogId} {
+      allow read: if resource.data.published == true || (isSignedIn() && request.auth.token.email == "binhvo20055@gmail.com");
+      allow write: if isSignedIn() && request.auth.token.email == "binhvo20055@gmail.com";
+    }
+  }
+}

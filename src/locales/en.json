@@ -1,0 +1,21 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "projects": "Projects",
+    "experience": "Experience",
+    "capabilities": "Capabilities",
+    "playground": "Playground",
+    "contact": "Contact",
+    "blog": "Blog"
+  },
+  "hero": {
+    "title": "DESIGNER & ENGINEER",
+    "subtitle": "BRIDGING THE GAP BETWEEN HUMAN INTUITION AND MACHINE INTELLIGENCE."
+  },
+  "common": {
+    "viewProject": "View Project",
+    "contactMe": "Contact Me",
+    "learnMore": "Learn More"
+  }
+}
