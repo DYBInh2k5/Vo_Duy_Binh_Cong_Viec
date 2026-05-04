@@ -1,11 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Trash2, Download, Play, RefreshCw, Layers, MousePointer2 } from 'lucide-react';
+import { Sparkles, Trash2, Download, Play, RefreshCw, Layers, MousePointer2, Plus } from 'lucide-react';
 import { GoogleGenAI } from '@google/genai';
 
 interface Shape {
   id: string;
-  type: 'circle' | 'square' | 'triangle';
+  type: 'circle' | 'square' | 'triangle' | 'cross' | 'frame';
   x: number;
   y: number;
   size: number;
@@ -77,6 +77,26 @@ const Playground = () => {
   };
 
   const clearCanvas = () => setShapes([]);
+  
+  const generateComposition = () => {
+    const newShapes: Shape[] = [];
+    const count = 10 + Math.floor(Math.random() * 5);
+    
+    for (let i = 0; i < count; i++) {
+      const type = (['circle', 'square', 'triangle', 'cross', 'frame'] as const)[Math.floor(Math.random() * 5)];
+      newShapes.push({
+        id: Math.random().toString(36).substr(2, 9),
+        type,
+        x: 20 + Math.random() * 60,
+        y: 20 + Math.random() * 60,
+        size: Math.random() * 150 + 50,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rotation: (Math.floor(Math.random() * 4) * 90) + (Math.random() > 0.8 ? 45 : 0),
+        opacity: Math.random() * 0.5 + 0.5
+      });
+    }
+    setShapes(newShapes);
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-8 pt-24 pb-24 min-h-screen">
@@ -111,10 +131,18 @@ const Playground = () => {
 
           <div className="border-4 border-black p-6 bg-white hard-shadow">
             <h3 className="font-black uppercase tracking-widest text-xs mb-4 border-b-2 border-black pb-2">Manual Override</h3>
-            <div className="flex gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <ToolButton onClick={() => addShape('square')} icon={<Layers />} label="Block" />
               <ToolButton onClick={() => addShape('circle')} icon={<RefreshCw />} label="Orbital" />
               <ToolButton onClick={() => addShape('triangle')} icon={<Play className="rotate-[-90deg]" />} label="Vector" />
+              <ToolButton onClick={() => addShape('cross')} icon={<Plus />} label="Cross" />
+              <ToolButton onClick={() => addShape('frame')} icon={<div className="w-4 h-4 border-2 border-black" />} label="Frame" />
+              <button 
+                onClick={generateComposition}
+                className="bg-bauhaus-yellow border-2 border-black font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 hover:bg-black hover:text-white transition-all"
+              >
+                Auto Composition
+              </button>
             </div>
             <button
               onClick={clearCanvas}
@@ -211,6 +239,17 @@ const ShapeRenderer = ({ type, color }: { type: Shape['type'], color: string }) 
           />
         </div>
       );
+    case 'cross':
+      return (
+        <div className="w-full h-full relative" style={{ color }}>
+          <div className="absolute top-1/2 left-0 w-full h-1/4 bg-current -translate-y-1/2 border-2 border-black" />
+          <div className="absolute left-1/2 top-0 h-full w-1/4 bg-current -translate-x-1/2 border-2 border-black" />
+        </div>
+      );
+    case 'frame':
+      return <div className="w-full h-full border-[12px] border-black" style={{ borderColor: 'black', backgroundColor: 'transparent' }}>
+        <div className="w-full h-full border-4 border-current" style={{ borderColor: color }} />
+      </div>;
     default:
       return null;
   }

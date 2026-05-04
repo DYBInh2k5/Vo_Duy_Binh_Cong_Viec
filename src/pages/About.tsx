@@ -163,6 +163,7 @@ const About = () => {
           <p className="text-xl font-bold uppercase tracking-widest mt-2">{PERSONAL_INFO.education}</p>
           <div className="flex gap-4 text-sm mt-4">
              <span>{PERSONAL_INFO.email}</span>
+             <span>{PERSONAL_INFO.phone}</span>
              <span>{PERSONAL_INFO.location}</span>
           </div>
         </div>

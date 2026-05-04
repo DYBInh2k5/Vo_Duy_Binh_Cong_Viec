@@ -3,6 +3,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { ThemeProvider } from './context/ThemeContext';
+import { useRemoteConfig } from './hooks/useRemoteConfig';
+import { AlertTriangle } from 'lucide-react';
+import PushNotificationManager from './components/PushNotificationManager';
 
 // Lazy load pages for performance
 const Home = React.lazy(() => import('./pages/Home'));
@@ -20,6 +23,21 @@ const ProjectDetail = React.lazy(() => import('./pages/ProjectDetail'));
 const AIAssistant = React.lazy(() => import('./components/AIAssistant'));
 
 function App() {
+  const { showMaintenance, welcomeMessage } = useRemoteConfig();
+
+  if (showMaintenance) {
+    return (
+      <div className="min-h-screen bg-bauhaus-black flex flex-col items-center justify-center text-white p-8 text-center">
+        <AlertTriangle size={80} className="text-bauhaus-yellow mb-8 animate-pulse" />
+        <h1 className="text-6xl font-black uppercase mb-4 tracking-tighter italic">Under Maintenance</h1>
+        <p className="text-xl font-bold opacity-60 max-w-md">{welcomeMessage}</p>
+        <div className="mt-12 w-full max-w-xs h-2 bg-white/10 rounded-full overflow-hidden">
+          <div className="h-full bg-bauhaus-red w-1/2 animate-pulse"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <ThemeProvider>
       <Router>
@@ -48,6 +66,7 @@ function App() {
           </Suspense>
         </main>
         <Footer />
+        <PushNotificationManager />
         <Suspense fallback={null}>
           <AIAssistant />
         </Suspense>

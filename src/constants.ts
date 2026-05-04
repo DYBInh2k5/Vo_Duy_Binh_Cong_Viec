@@ -157,10 +157,12 @@ export const PERSONAL_INFO = {
   fullName: "Võ Duy Bình",
   nickname: "coDY",
   birthday: "July 02, 2005",
-  location: "Ho Chi Minh City, Vietnam",
+  location: "KDC Ven Sông, Tân Hưng, Quận 7, TP. Hồ Chí Minh",
   education: "Software Technology, Hoa Sen University",
   languages: ["Vietnamese (Native)", "English (IELTS 6.0 / TOEIC 650)", "Chinese (HSK 3)", "Japanese (JLPT N5)", "Korean (TOPIK 1)"],
   email: "binh.vd01500@sinhvien.hoasen.edu.vn",
+  phone: "0981316779",
+  zalo: "0981316779",
   profileImage: "/profile_cody.jpg",
   socials: {
     github: "https://github.com/DYBInh2k5",

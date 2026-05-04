@@ -47,8 +47,16 @@ const Contact = () => {
               <div className="flex items-start gap-4">
                 <Phone size={32} className="text-white" />
                 <div>
-                  <p className="font-black text-black uppercase text-xs tracking-widest mb-1">Voice Link</p>
-                  <p className="text-[32px] leading-none font-black text-white tracking-tighter uppercase">+49 30 882 1919</p>
+                  <p className="font-black text-black uppercase text-xs tracking-widest mb-1">Voice Link & Zalo</p>
+                  <p className="text-[32px] leading-none font-black text-white tracking-tighter uppercase mb-2">{PERSONAL_INFO.phone}</p>
+                  <a 
+                    href={`https://zalo.me/${PERSONAL_INFO.zalo}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-block bg-white text-black px-4 py-1 font-black text-[10px] uppercase border-2 border-black hover:bg-bauhaus-yellow transition-all"
+                  >
+                    Chat on Zalo
+                  </a>
                 </div>
               </div>
             </div>
@@ -178,14 +186,15 @@ const Contact = () => {
                 {PERSONAL_INFO.location}
               </p>
             </div>
-            <div className="h-32 border-4 border-black grayscale overflow-hidden relative group">
-              <img 
-                className="w-full h-full object-cover group-hover:grayscale-0 transition-all duration-500" 
-                src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=800&auto=format&fit=crop" 
-                alt="Map representation"
+            <div className="h-64 border-4 border-black overflow-hidden relative group">
+              <iframe 
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(PERSONAL_INFO.location)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+                className="w-full h-full border-0 grayscale hover:grayscale-0 transition-all duration-500"
+                allowFullScreen
+                loading="lazy"
                 referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 bg-bauhaus-red/10 group-hover:bg-transparent transition-colors"></div>
+                title="Bản đồ vị trí"
+              ></iframe>
             </div>
           </div>
         </div>
