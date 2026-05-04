@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { handleFirestoreError, OperationType } from '../lib/firestoreUtils';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Calendar, Tag, ChevronRight } from 'lucide-react';
@@ -22,9 +23,11 @@ const Blog = () => {
 
   useEffect(() => {
     const fetchPosts = async () => {
+      const path = 'blogs';
+      setLoading(true);
       try {
         const q = query(
-          collection(db, 'blogs'),
+          collection(db, path),
           where('published', '==', true),
           orderBy('date', 'desc')
         );
@@ -35,7 +38,7 @@ const Blog = () => {
         })) as BlogPost[];
         setPosts(fetchedPosts);
       } catch (error) {
-        console.error("Error fetching posts:", error);
+        handleFirestoreError(error, OperationType.GET, path);
       } finally {
         setLoading(false);
       }

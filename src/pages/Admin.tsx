@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { auth, loginWithGoogle, logout, db } from '../lib/firebase';
+import { auth, loginWithGoogle, logout, db, storage } from '../lib/firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { handleFirestoreError, OperationType } from '../lib/firestoreUtils';
 import { PROJECTS, EXPERIENCE } from '../constants';
-import { Layout, Plus, Trash2, Edit2, LogOut, Save, RefreshCw, Layers, BookOpen, Briefcase } from 'lucide-react';
-import { motion } from 'motion/react';
+import { Layout, Plus, Trash2, Edit2, LogOut, Save, RefreshCw, Layers, BookOpen, Briefcase, X, Upload } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
 const Admin = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -12,6 +14,10 @@ const Admin = () => {
   const [activeTab, setActiveTab] = useState<'projects' | 'experience' | 'blogs'>('projects');
   const [data, setData] = useState<any[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentItem, setCurrentItem] = useState<any>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
@@ -23,8 +29,13 @@ const Admin = () => {
 
   const fetchData = async () => {
     if (!user) return;
-    const snapshot = await getDocs(collection(db, activeTab));
-    setData(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+    const path = activeTab;
+    try {
+      const snapshot = await getDocs(collection(db, path));
+      setData(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.GET, path);
+    }
   };
 
   useEffect(() => {
@@ -37,20 +48,80 @@ const Admin = () => {
     try {
       // Sync Projects
       for (const p of PROJECTS) {
-        await setDoc(doc(db, 'projects', p.id), { ...p, order: parseInt(p.id) });
+        const path = `projects/${p.id}`;
+        try {
+          await setDoc(doc(db, 'projects', p.id), { ...p, order: parseInt(p.id) });
+        } catch (err) {
+          handleFirestoreError(err, OperationType.WRITE, path);
+        }
       }
       // Sync Experience
       for (let i = 0; i < EXPERIENCE.length; i++) {
         const exp = EXPERIENCE[i];
-        await addDoc(collection(db, 'experience'), { ...exp, order: i });
+        const path = 'experience';
+        try {
+          await addDoc(collection(db, path), { ...exp, order: i });
+        } catch (err) {
+          handleFirestoreError(err, OperationType.CREATE, path);
+        }
       }
       alert("Initial data synced to Firestore!");
       fetchData();
     } catch (error) {
-      alert("Sync failed: " + (error as any).message);
+      console.error("Sync Error:", error);
+      alert("Sync failed: " + (error instanceof Error ? error.message : "Security Constraint Violation"));
     } finally {
       setIsSyncing(false);
     }
+  };
+
+  const handleFileUpload = async (file: File) => {
+    const storageRef = ref(storage, `uploads/${Date.now()}_${file.name}`);
+    try {
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      return url;
+    } catch (error) {
+      console.error("Upload failed", error);
+      alert("Image upload failed");
+      return null;
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    const path = activeTab;
+
+    try {
+      if (currentItem.id) {
+        // Update
+        const docRef = doc(db, activeTab, currentItem.id);
+        await updateDoc(docRef, currentItem).catch(err => handleFirestoreError(err, OperationType.UPDATE, `${activeTab}/${currentItem.id}`));
+      } else {
+        // Create
+        await addDoc(collection(db, activeTab), { 
+          ...currentItem, 
+          createdAt: new Date().toISOString() 
+        }).catch(err => handleFirestoreError(err, OperationType.CREATE, activeTab));
+      }
+      setIsModalOpen(false);
+      fetchData();
+    } catch (error) {
+      console.error("Submit Error:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const openAddModal = () => {
+    setCurrentItem({});
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (item: any) => {
+    setCurrentItem(item);
+    setIsModalOpen(true);
   };
 
   if (loading) return (
@@ -141,7 +212,10 @@ const Admin = () => {
             >
               {isSyncing ? "Syncing..." : "Sync Constants"}
             </button>
-            <button className="bg-bauhaus-blue text-white px-6 py-3 font-black uppercase border-4 border-black hard-shadow hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all flex items-center gap-2">
+            <button 
+              onClick={openAddModal}
+              className="bg-bauhaus-blue text-white px-6 py-3 font-black uppercase border-4 border-black hard-shadow hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all flex items-center gap-2"
+            >
               <Plus size={24} /> Add New
             </button>
           </div>
@@ -172,12 +246,22 @@ const Admin = () => {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button className="p-3 border-2 border-black hover:bg-bauhaus-yellow transition-all"><Edit2 size={18} /></button>
+                  <button 
+                    onClick={() => openEditModal(item)}
+                    className="p-3 border-2 border-black hover:bg-bauhaus-yellow transition-all"
+                  >
+                    <Edit2 size={18} />
+                  </button>
                   <button 
                     onClick={async () => {
                       if(confirm("Delete this entry?")) {
-                        await deleteDoc(doc(db, activeTab, item.id));
-                        fetchData();
+                        const path = `${activeTab}/${item.id}`;
+                        try {
+                          await deleteDoc(doc(db, activeTab, item.id));
+                          fetchData();
+                        } catch (error) {
+                          handleFirestoreError(error, OperationType.DELETE, path);
+                        }
                       }
                     }}
                     className="p-3 border-2 border-black hover:bg-bauhaus-red hover:text-white transition-all"
@@ -188,6 +272,110 @@ const Admin = () => {
           )}
         </div>
       </main>
+
+      {/* Entry Modal */}
+      <AnimatePresence>
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-8 bg-black/80 backdrop-blur-sm">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white border-8 border-black w-full max-w-2xl p-12 relative hard-shadow-lg max-h-[90vh] overflow-y-auto"
+            >
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="absolute top-4 right-4 p-2 hover:bg-bauhaus-red hover:text-white transition-all"
+              >
+                <X size={24} />
+              </button>
+
+              <h2 className="text-4xl font-black uppercase mb-8 italic border-b-4 border-black pb-4">
+                {currentItem.id ? `Edit ${activeTab.slice(0, -1)}` : `New ${activeTab.slice(0, -1)}`}
+              </h2>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="flex flex-col gap-2">
+                  <label className="font-black uppercase text-xs tracking-widest">Title / Name</label>
+                  <input 
+                    required
+                    type="text" 
+                    value={currentItem.title || currentItem.company || ''} 
+                    onChange={e => setCurrentItem({...currentItem, [activeTab === 'experience' ? 'company' : 'title']: e.target.value})}
+                    className="p-4 border-4 border-black font-bold outline-none focus:bg-bauhaus-yellow transition-colors"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="font-black uppercase text-xs tracking-widest">Tagline / Role</label>
+                  <input 
+                    required
+                    type="text" 
+                    value={currentItem.tagline || currentItem.role || ''} 
+                    onChange={e => setCurrentItem({...currentItem, [activeTab === 'experience' ? 'role' : 'tagline']: e.target.value})}
+                    className="p-4 border-4 border-black font-bold outline-none focus:bg-bauhaus-yellow transition-colors"
+                  />
+                </div>
+
+                {activeTab !== 'experience' && (
+                  <div className="flex flex-col gap-2">
+                    <label className="font-black uppercase text-xs tracking-widest">Cover Image</label>
+                    <div className="flex gap-4">
+                      {currentItem.image && (
+                         <div className="w-24 h-24 border-4 border-black relative shrink-0">
+                            <img src={currentItem.image} className="w-full h-full object-cover" />
+                            <button 
+                              type="button"
+                              onClick={() => setCurrentItem({...currentItem, image: ''})}
+                              className="absolute -top-3 -right-3 bg-bauhaus-red text-white p-1 rounded-full border-2 border-black"
+                            >
+                              <X size={12} />
+                            </button>
+                         </div>
+                      )}
+                      <label className="flex-grow border-4 border-dashed border-black hover:bg-gray-100 transition-colors flex flex-col items-center justify-center p-4 cursor-pointer gap-2">
+                        <Upload size={24} className="opacity-40" />
+                        <span className="text-[10px] font-black uppercase tracking-widest leading-none">Upload to Storage</span>
+                        <input 
+                          type="file" 
+                          accept="image/*"
+                          className="hidden" 
+                          onChange={async e => {
+                            if (e.target.files?.[0]) {
+                              const url = await handleFileUpload(e.target.files[0]);
+                              if (url) setCurrentItem({...currentItem, image: url});
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex flex-col gap-2">
+                  <label className="font-black uppercase text-xs tracking-widest">Detailed Content</label>
+                  <textarea 
+                    rows={4}
+                    value={currentItem.description || currentItem.content || ''} 
+                    onChange={e => setCurrentItem({...currentItem, [activeTab === 'blogs' ? 'content' : 'description']: e.target.value})}
+                    className="p-4 border-4 border-black font-bold outline-none focus:bg-bauhaus-yellow transition-colors resize-none"
+                  />
+                </div>
+
+                <div className="pt-6">
+                  <button 
+                    disabled={isSubmitting}
+                    className="w-full bg-black text-white py-6 font-black uppercase tracking-[0.2em] border-4 border-black hover:bg-bauhaus-blue active:translate-x-1 active:translate-y-1 transition-all flex items-center justify-center gap-4"
+                  >
+                    {isSubmitting ? <RefreshCw className="animate-spin" /> : <Save size={24} />}
+                    {currentItem.id ? 'COMMIT UPDATES' : 'EXECUTE CREATION'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -113,10 +113,10 @@ const Projects = () => {
                     {project.description}
                   </p>
                   <Link 
-                    to={`/projects`} 
-                    className="mt-6 flex justify-between items-center group-hover:translate-x-2 transition-transform"
+                    to={`/projects/${project.id}`} 
+                    className="mt-6 flex justify-between items-center group-hover:translate-x-2 transition-all"
                   >
-                    <span className="font-bold text-bauhaus-red uppercase underline decoration-2 underline-offset-4">Details</span>
+                    <span className="font-bold text-bauhaus-red uppercase underline decoration-2 underline-offset-4 tracking-widest text-xs">Read Case Study_</span>
                     <ArrowRight size={24} className="text-black" />
                   </Link>
                 </div>

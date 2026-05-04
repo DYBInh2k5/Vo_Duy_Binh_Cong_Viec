@@ -1,188 +1,219 @@
-import React from 'react';
-import { EXPERIMENTS } from '../constants';
-import { motion } from 'motion/react';
-import { Brain, MessageSquare, Ticket, Sparkles, Layout, Grid3X3, Layers, Quote } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Sparkles, Trash2, Download, Play, RefreshCw, Layers, MousePointer2 } from 'lucide-react';
+import { GoogleGenAI } from '@google/genai';
+
+interface Shape {
+  id: string;
+  type: 'circle' | 'square' | 'triangle';
+  x: number;
+  y: number;
+  size: number;
+  color: string;
+  rotation: number;
+  opacity: number;
+}
 
 const Playground = () => {
+  const [shapes, setShapes] = useState<Shape[]>([]);
+  const [prompt, setPrompt] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const canvasRef = useRef<HTMLDivElement>(null);
+
+  const colors = ['#D02020', '#2850CE', '#FFD700', '#1C1B1B', '#FCF9F8'];
+
+  const addShape = (type: Shape['type']) => {
+    const newShape: Shape = {
+      id: Math.random().toString(36).substr(2, 9),
+      type,
+      x: Math.random() * 80 + 10,
+      y: Math.random() * 80 + 10,
+      size: Math.random() * 100 + 50,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rotation: Math.random() * 360,
+      opacity: 1
+    };
+    setShapes([...shapes, newShape]);
+  };
+
+  const handleGenerate = async () => {
+    if (!prompt.trim() || isGenerating) return;
+    setIsGenerating(true);
+    
+    try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) throw new Error("API Key missing");
+      
+      const genAI = new GoogleGenAI({ apiKey });
+      const model = genAI.models.generateContent({
+        model: "gemini-1.5-flash",
+        contents: [{
+          role: "user",
+          parts: [{
+            text: `Act as a Bauhaus design engine. Based on the prompt "${prompt}", generate a list of 5-8 geometric shapes. 
+            Return ONLY a valid JSON array of objects with this structure: 
+            {"type": "circle"|"square"|"triangle", "x": 0-100, "y": 0-100, "size": 50-200, "color": "#D02020"|"#2850CE"|"#FFD700"|"#1C1B1B", "rotation": 0-360}
+            Do not include any markdown or text around the JSON.`
+          }]
+        }]
+      });
+
+      const response = await model;
+      const text = response.text;
+      const jsonStr = text.replace(/```json|```/g, '').trim();
+      const generatedShapes = JSON.parse(jsonStr).map((s: any) => ({
+        ...s,
+        id: Math.random().toString(36).substr(2, 9),
+        opacity: 1
+      }));
+      
+      setShapes(generatedShapes);
+    } catch (err) {
+      console.error(err);
+      alert("Neural grid failure. Please retry.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const clearCanvas = () => setShapes([]);
+
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="px-8 py-16 md:py-xl border-b-4 border-black bg-bauhaus-off-white">
-        <div className="max-w-screen-2xl mx-auto">
-          <h1 className="text-5xl sm:text-7xl md:text-9xl lg:text-[120px] leading-[0.9] font-black uppercase mb-lg tracking-[-0.04em]">
-            THE LAB /<br />
-            <span className="text-bauhaus-red">PLAYGROUND</span>
-          </h1>
-          <div className="grid grid-cols-12 gap-gutter items-end">
-            <div className="col-span-12 md:col-span-6 border-4 border-black p-8 sm:p-12 bg-bauhaus-blue text-white hard-shadow">
-              <p className="text-4xl font-black mb-4 uppercase tracking-tighter italic">EXPERIMENTAL ZONE 01</p>
-              <p className="text-xl font-bold leading-relaxed opacity-90">
-                Where logic meets chaos. A collection of raw ideas, brutalist experiments, and architectural prototypes that challenge standard digital affordances.
-              </p>
+    <div className="max-w-7xl mx-auto px-8 pt-24 pb-24 min-h-screen">
+      <header className="mb-12">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="w-12 h-12 bg-bauhaus-red border-4 border-black shrink-0"></div>
+          <h1 className="text-6xl md:text-8xl font-black uppercase tracking-tighter">LAB / <span className="text-bauhaus-blue">01</span></h1>
+        </div>
+        <p className="text-xl font-bold uppercase italic tracking-tight opacity-60">Bauhaus Generative Composition Engine</p>
+      </header>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Controls Sidebar */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="border-4 border-black p-6 bg-white hard-shadow">
+            <h3 className="font-black uppercase tracking-widest text-xs mb-4 border-b-2 border-black pb-2">Neural Input</h3>
+            <textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="e.g., 'Anxious geometric struggle' or 'Calm circular balance'..."
+              className="w-full h-32 p-4 border-2 border-black font-bold focus:bg-bauhaus-yellow outline-none transition-colors"
+            />
+            <button
+              onClick={handleGenerate}
+              disabled={isGenerating || !prompt.trim()}
+              className="w-full mt-4 bg-bauhaus-black text-white py-4 font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-bauhaus-red transition-all disabled:opacity-50"
+            >
+              {isGenerating ? <RefreshCw className="animate-spin" /> : <Sparkles size={20} />}
+              Execute Generation
+            </button>
+          </div>
+
+          <div className="border-4 border-black p-6 bg-white hard-shadow">
+            <h3 className="font-black uppercase tracking-widest text-xs mb-4 border-b-2 border-black pb-2">Manual Override</h3>
+            <div className="flex gap-2">
+              <ToolButton onClick={() => addShape('square')} icon={<Layers />} label="Block" />
+              <ToolButton onClick={() => addShape('circle')} icon={<RefreshCw />} label="Orbital" />
+              <ToolButton onClick={() => addShape('triangle')} icon={<Play className="rotate-[-90deg]" />} label="Vector" />
             </div>
-            <div className="col-span-12 md:col-span-1"></div>
-            <div className="col-span-12 md:col-span-5">
-              <div className="w-full aspect-video bg-white border-4 border-black shadow-[8px_8px_0px_0px_#FFD700] relative overflow-hidden group">
-                <img 
-                  className="w-full h-full object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all duration-700" 
-                  src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=800&auto=format&fit=crop" 
-                  alt="Lab Visual"
-                  referrerPolicy="no-referrer"
-                />
-              </div>
-            </div>
+            <button
+              onClick={clearCanvas}
+              className="w-full mt-6 border-2 border-black py-2 font-black uppercase text-xs hover:bg-gray-100 flex items-center justify-center gap-2"
+            >
+              <Trash2 size={14} /> Clear Composition
+            </button>
           </div>
         </div>
-      </section>
 
-      {/* Bento Grid / AI Experiments */}
-      <section className="bg-white px-8 py-xl overflow-hidden border-b-4 border-black">
-        <div className="max-w-screen-2xl mx-auto">
-          <div className="flex flex-col sm:flex-row items-center gap-4 mb-16">
-            <div className="w-8 h-8 bg-bauhaus-red border-2 border-black shrink-0"></div>
-            <h2 className="text-4xl sm:text-5xl font-black uppercase tracking-tighter">AI Experiments</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-            {/* Large Feature Card */}
-            <div className="md:col-span-8 border-4 border-black bg-white p-12 hard-shadow hover:shadow-[12px_12px_0px_0px_#D02020] transition-all group">
-              <div className="flex justify-between items-start mb-8">
-                <span className="bg-bauhaus-yellow text-black font-black text-xs px-4 py-2 uppercase border-2 border-black tracking-widest">V.04 PROTOTYPE</span>
-                <Brain size={48} className="text-bauhaus-black" />
-              </div>
-              <h3 className="text-4xl font-black uppercase mb-4 tracking-tighter italic">Neural Topography Generator</h3>
-              <p className="text-xl font-medium mb-12 max-w-2xl text-bauhaus-black/70">
-                Generating 3D architectural landscapes based on semantic prompts. This experiment explores the intersection of language and volumetric space.
-              </p>
-              <div className="grid grid-cols-3 gap-2 h-32 mb-12">
-                <div className="bg-bauhaus-black"></div>
-                <div className="bg-bauhaus-red"></div>
-                <div className="bg-bauhaus-blue"></div>
-              </div>
-              <button className="w-full md:w-auto px-12 py-4 bg-black text-white font-black uppercase border-2 border-black hard-shadow hover:bg-bauhaus-red active:translate-x-1 active:translate-y-1 active:shadow-none transition-all">
-                Launch Sandbox
-              </button>
-            </div>
-            {/* Side Card Stack */}
-            <div className="md:col-span-4 flex flex-col gap-8">
-              <div className="flex-1 border-4 border-black bg-white p-8 hard-shadow hover:-translate-y-1 transition-transform group">
-                <div className="w-12 h-12 bg-bauhaus-blue flex items-center justify-center mb-4 border-2 border-black">
-                  <MessageSquare size={24} className="text-white" />
-                </div>
-                <h4 className="font-black uppercase border-b-2 border-black pb-2 mb-4 tracking-widest text-xs">Semantic UI Lab</h4>
-                <p className="font-bold text-bauhaus-black/60 italic leading-snug">Self-assembling interfaces driven by user intent analysis.</p>
-              </div>
-              <div className="flex-1 border-4 border-black bg-white p-8 hard-shadow hover:-translate-y-1 transition-transform">
-                <div className="w-12 h-12 bg-bauhaus-red flex items-center justify-center mb-4 border-2 border-black">
-                  <Ticket size={24} className="text-white" />
-                </div>
-                <h4 className="font-black uppercase border-b-2 border-black pb-2 mb-4 tracking-widest text-xs">Prompt-to-Grid</h4>
-                <p className="font-bold text-bauhaus-black/60 italic leading-snug">Automated layout engine for constructivist compositions.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Content System Overlapping Section */}
-      <section className="relative z-10 py-xl px-8 bg-bauhaus-off-white">
-        <div className="max-w-screen-2xl mx-auto flex flex-col md:flex-row items-stretch">
-          <div className="w-full md:w-1/2 bg-white border-4 border-black p-12 shadow-[16px_16px_0px_0px_#2850ce] relative z-20">
-            <h2 className="text-6xl font-black uppercase mb-8 leading-none tracking-tighter">Content<br/>System</h2>
-            <ul className="space-y-4">
-              {[
-                { label: "Variable Type Scaling", icon: Layout },
-                { label: "The Grid-Braker Engine", icon: Grid3X3 },
-                { label: "Color-Block Logic V2", icon: Layers }
-              ].map((item, i) => (
-                <li key={i} className="flex items-center gap-4 border-b-4 border-black py-4 group cursor-pointer">
-                  <item.icon size={24} className="text-bauhaus-red group-hover:scale-125 transition-transform" />
-                  <span className="font-black text-xl uppercase tracking-tighter">{item.label}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-12 group overflow-hidden border-4 border-black aspect-video relative">
-               <img 
-                className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 
-                src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=800&auto=format&fit=crop" 
-                alt="Workspace"
-                referrerPolicy="no-referrer"
-               />
-            </div>
-          </div>
-          <div className="w-full md:w-1/2 bg-bauhaus-yellow border-4 border-black md:-ml-8 md:mt-16 p-12 shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] flex flex-col justify-center">
-            <p className="text-3xl font-black text-black mb-8 leading-tight uppercase tracking-tighter">
-              "Architecture is the will of an epoch translated into space. Digital systems should follow the same mandate."
-            </p>
-            <div className="flex items-center gap-4 text-black/60 italic font-bold">
-              <Quote size={32} fill="currentColor" />
-              <p>Walter Gropius, 1919</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Personal Archive Section */}
-      <section className="px-8 py-xl bg-bauhaus-black text-white">
-        <div className="max-w-screen-2xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter">
-            <div className="col-span-12 md:col-span-4 flex flex-col justify-center">
-              <h2 className="text-6xl sm:text-8xl font-black uppercase leading-none mb-8 text-bauhaus-yellow tracking-tighter">ARCHIVE</h2>
-              <p className="text-xl font-bold opacity-80 leading-relaxed border-l-4 border-bauhaus-red pl-6">
-                A linear history of discarded prototypes, failed experiments, and the rough sketches that built the foundation of coDY.
-              </p>
-            </div>
-            <div className="col-span-12 md:col-span-8 grid grid-cols-2 gap-4">
-              {[
-                { year: "2021", tag: "PROTOTYPE_A", img: "https://images.unsplash.com/photo-1507721999472-8ed4421c4af2?q=80&w=800&auto=format&fit=crop" },
-                { year: "2022", tag: "SYSTEM_CORE", img: "https://images.unsplash.com/photo-1544391496-1ca7c9745748?q=80&w=800&auto=format&fit=crop" },
-                { year: "2023", tag: "FULL_SCALE_ASSEMBLY", img: "https://images.unsplash.com/photo-1487014679447-9f8336841d58?q=80&w=800&auto=format&fit=crop", span: true }
-              ].map((item, i) => (
-                <div key={i} className={`h-64 border-2 border-white relative group overflow-hidden ${item.span ? 'col-span-2' : ''}`}>
-                  <img 
-                    className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500" 
-                    src={item.img} 
-                    alt={item.tag} 
-                    referrerPolicy="no-referrer"
-                  />
-                  <div className="absolute bottom-0 left-0 bg-white text-black font-black px-4 py-2 text-xs uppercase tracking-widest">
-                    {item.year} / {item.tag}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Side Protocols */}
-      <section className="py-24 max-w-7xl mx-auto px-8">
-         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-16">
-            <h2 className="text-4xl sm:text-6xl font-black tracking-tighter uppercase whitespace-normal sm:whitespace-nowrap">SIDE_PROTOCOL_LOGS</h2>
-            <div className="h-2 w-full sm:flex-grow bg-black"></div>
-         </div>
-
-         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {EXPERIMENTS.map((exp) => (
-              <motion.div 
-                key={exp.id}
-                whileHover={{ y: -10 }}
-                className="bg-white border-4 border-black p-8 hard-shadow-lg group cursor-pointer"
+        {/* Canvas Area */}
+        <div className="lg:col-span-8 bg-bauhaus-off-white border-8 border-black relative aspect-square overflow-hidden hard-shadow-lg group">
+          <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(black 1px, transparent 0)', backgroundSize: '20px 20px' }}></div>
+          
+          <AnimatePresence>
+            {shapes.map((shape) => (
+              <motion.div
+                key={shape.id}
+                initial={{ scale: 0, opacity: 0, rotate: 0 }}
+                animate={{ 
+                  scale: 1, 
+                  opacity: shape.opacity, 
+                  rotate: shape.rotation,
+                  left: `${shape.x}%`,
+                  top: `${shape.y}%`
+                }}
+                exit={{ scale: 0, opacity: 0 }}
+                drag
+                dragMomentum={false}
+                className="absolute cursor-grab active:cursor-grabbing"
+                style={{
+                  width: shape.size,
+                  height: shape.size,
+                  transform: 'translate(-50%, -50%)',
+                }}
               >
-                <div className="flex justify-between items-start mb-12">
-                   <div className="w-12 h-12 bg-bauhaus-blue border-2 border-black flex items-center justify-center group-hover:bg-bauhaus-red transition-colors">
-                      <Sparkles size={24} className="text-white" />
-                   </div>
-                   <span className="font-black text-xs text-bauhaus-black/40">{exp.date}</span>
-                </div>
-                <h3 className="text-2xl font-black tracking-tighter mb-4 uppercase italic leading-none">{exp.title}</h3>
-                <p className="font-bold text-bauhaus-black/70 mb-8 h-12 overflow-hidden leading-snug">{exp.description}</p>
-                <div className="inline-block font-black underline decoration-4 hover:text-bauhaus-red transition-colors">EXPLORE_SOURCE</div>
+                <ShapeRenderer type={shape.type} color={shape.color} />
               </motion.div>
             ))}
-         </div>
-      </section>
+          </AnimatePresence>
+
+          {shapes.length === 0 && !isGenerating && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none opacity-20">
+              <MousePointer2 size={64} className="mb-4" />
+              <p className="text-4xl font-black uppercase tracking-tighter italic">Empty Canvas</p>
+              <p className="font-bold uppercase text-xs mt-2">Enter prompt or use controls to begin</p>
+            </div>
+          )}
+
+          {isGenerating && (
+            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
+              <div className="w-16 h-16 border-8 border-black border-t-bauhaus-red animate-spin mb-4"></div>
+              <p className="font-black uppercase tracking-widest text-sm animate-pulse">Computing Geometric Logic...</p>
+            </div>
+          )}
+
+          {/* Export Overlay */}
+          <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
+             <button className="bg-black text-white p-4 border-2 border-black hover:bg-bauhaus-blue transition-all">
+                <Download size={24} />
+             </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
+};
+
+const ToolButton = ({ onClick, icon, label }: { onClick: () => void, icon: React.ReactNode, label: string }) => (
+  <button
+    onClick={onClick}
+    className="flex-1 border-2 border-black py-4 bg-bauhaus-off-white hover:bg-bauhaus-yellow transition-all flex flex-col items-center justify-center gap-2 group"
+  >
+    <div className="group-hover:scale-110 transition-transform">{icon}</div>
+    <span className="text-[10px] font-black uppercase tracking-widest">{label}</span>
+  </button>
+);
+
+const ShapeRenderer = ({ type, color }: { type: Shape['type'], color: string }) => {
+  switch (type) {
+    case 'circle':
+      return <div className="w-full h-full rounded-full border-2 border-black" style={{ backgroundColor: color }} />;
+    case 'square':
+      return <div className="w-full h-full border-2 border-black" style={{ backgroundColor: color }} />;
+    case 'triangle':
+      return (
+        <div 
+          className="w-0 h-0 border-l-[50px] border-l-transparent border-r-[50px] border-r-transparent border-b-[86.6px]" 
+          style={{ borderBottomColor: 'black', position: 'relative' }}
+        >
+          <div 
+             className="w-0 h-0 border-l-[46px] border-l-transparent border-r-[46px] border-r-transparent border-b-[80px] absolute left-[-46px] top-[4px]"
+             style={{ borderBottomColor: color }}
+          />
+        </div>
+      );
+    default:
+      return null;
+  }
 };
 
 export default Playground;

@@ -1,11 +1,15 @@
 {
   "nav": {
     "home": "Home",
+    "profile": "Profile",
+    "works": "Works",
+    "labs": "Labs",
     "about": "About",
     "projects": "Projects",
     "experience": "Experience",
     "capabilities": "Capabilities",
     "playground": "Playground",
+    "dashboard": "Dashboard",
     "contact": "Contact",
     "blog": "Blog",
     "admin": "Admin"

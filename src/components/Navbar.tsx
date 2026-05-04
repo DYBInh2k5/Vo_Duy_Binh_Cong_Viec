@@ -1,11 +1,13 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, Languages } from 'lucide-react';
+import { Menu, X, Languages, DraftingCompass, Palette } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '../context/ThemeContext';
 
 const Navbar = () => {
   const { t, i18n } = useTranslation();
+  const { mode, toggleMode } = useTheme();
   const [isOpen, setIsOpen] = React.useState(false);
   const location = useLocation();
 
@@ -14,14 +16,29 @@ const Navbar = () => {
     i18n.changeLanguage(newLang);
   };
 
-  const navLinks = [
-    { name: t('nav.home'), path: '/' },
-    { name: t('nav.projects'), path: '/projects' },
-    { name: t('nav.blog'), path: '/blog' },
-    { name: t('nav.experience'), path: '/experience' },
-    { name: t('nav.capabilities'), path: '/capabilities' },
-    { name: t('nav.about'), path: '/about' },
-    { name: t('nav.contact'), path: '/contact' },
+  const navGroups = [
+    { 
+      label: t('nav.works'), 
+      links: [
+        { name: t('nav.projects'), path: '/projects' },
+        { name: t('nav.blog'), path: '/blog' }
+      ]
+    },
+    { 
+      label: t('nav.labs'), 
+      links: [
+        { name: t('nav.dashboard'), path: '/dashboard' },
+        { name: t('nav.playground'), path: '/playground' }
+      ]
+    },
+    { 
+      label: t('nav.profile'), 
+      links: [
+        { name: t('nav.about'), path: '/about' },
+        { name: t('nav.experience'), path: '/experience' },
+        { name: t('nav.capabilities'), path: '/capabilities' }
+      ]
+    },
   ];
 
   return (
@@ -31,19 +48,39 @@ const Navbar = () => {
       </Link>
 
       {/* Desktop Links */}
-      <div className="hidden md:flex gap-4">
-        {navLinks.map((link) => (
-          <Link
-            key={link.name}
-            to={link.path}
-            className={`px-4 py-1 uppercase font-bold tracking-tighter transition-none hover:bg-bauhaus-yellow hover:text-black active:translate-x-1 active:translate-y-1 ${
-              location.pathname === link.path 
-                ? 'bg-bauhaus-red text-white' 
-                : 'text-black dark:text-white'
-            }`}
-          >
-            {link.name}
-          </Link>
+      <div className="hidden lg:flex gap-2">
+        <Link
+          to="/"
+          className={`px-4 py-1 uppercase font-black tracking-tighter transition-all hover:bg-bauhaus-yellow hover:text-black ${
+            location.pathname === '/' ? 'bg-bauhaus-red text-white' : 'text-black dark:text-white'
+          }`}
+        >
+          {t('nav.home')}
+        </Link>
+        
+        {navGroups.map((group) => (
+          <div key={group.label} className="relative group/dropdown">
+            <button className="px-4 py-1 uppercase font-black tracking-tighter flex items-center gap-1 hover:bg-bauhaus-yellow transition-all dark:text-white group-hover/dropdown:bg-bauhaus-yellow group-hover/dropdown:text-black focus:outline-none">
+              {group.label}
+              <motion.span
+                animate={{ rotate: 0 }}
+                className="text-[10px] opacity-50"
+              >▼</motion.span>
+            </button>
+            <div className="absolute top-full left-0 bg-white border-4 border-black hard-shadow min-w-[200px] hidden group-hover/dropdown:block animate-in fade-in slide-in-from-top-2 duration-200">
+              {group.links.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`block px-6 py-3 font-black uppercase text-sm border-b-2 border-black last:border-0 hover:bg-bauhaus-red hover:text-white transition-all ${
+                    location.pathname === link.path ? 'bg-bauhaus-yellow text-black' : 'text-black'
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
 
@@ -55,6 +92,17 @@ const Navbar = () => {
         >
           <Languages size={14} />
           {i18n.language.toUpperCase()}
+        </button>
+
+        <button
+          onClick={toggleMode}
+          className={`flex items-center gap-2 px-3 py-1 border-2 border-black transition-all font-bold text-xs uppercase ${
+            mode === 'draft' ? 'bg-black text-white' : 'bg-white text-black hover:bg-bauhaus-yellow'
+          }`}
+          title={mode === 'draft' ? 'Switch to Bauhaus' : 'Switch to Draft'}
+        >
+          {mode === 'draft' ? <Palette size={14} /> : <DraftingCompass size={14} />}
+          {mode === 'draft' ? 'Bauhaus' : 'Draft'}
         </button>
 
         <Link 
@@ -88,12 +136,12 @@ const Navbar = () => {
             >
               <X size={24} />
             </button>
-            {navLinks.map((link) => (
+            {[{ name: t('nav.home'), path: '/' }, ...navGroups.flatMap(g => g.links)].map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
                 onClick={() => setIsOpen(false)}
-                className={`text-5xl font-black tracking-tighter uppercase ${
+                className={`text-4xl font-black tracking-tighter uppercase ${
                   location.pathname === link.path ? 'text-bauhaus-red' : 'text-bauhaus-black'
                 }`}
               >

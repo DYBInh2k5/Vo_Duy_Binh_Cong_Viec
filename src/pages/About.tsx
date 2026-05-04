@@ -1,13 +1,28 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { PERSONAL_INFO } from '../constants';
-import { Terminal, Layout, Zap, Database, Brush, Accessibility, DraftingCompass, Brain, Shield, Rocket, Globe } from 'lucide-react';
+import { PERSONAL_INFO, EXPERIENCE, PROJECTS } from '../constants';
+import { Terminal, Layout, Zap, Database, Brush, Accessibility, DraftingCompass, Brain, Shield, Rocket, Globe, FileText, Download } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 const About = () => {
   const { t } = useTranslation();
+
+  const handlePrint = () => {
+    window.print();
+  };
+
   return (
-    <div className="max-w-7xl mx-auto px-8 pt-24 pb-24">
+    <div className="max-w-7xl mx-auto px-8 pt-24 pb-24 relative">
+      {/* Resume Download Action */}
+      <div className="flex justify-end mb-8 no-print">
+        <button
+          onClick={handlePrint}
+          className="bg-black text-white px-8 py-4 font-black uppercase tracking-widest border-4 border-black hard-shadow hover:bg-bauhaus-red hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-2"
+        >
+          <FileText size={20} /> Generate PDF Resume
+        </button>
+      </div>
+
       {/* Hero Section */}
       <header className="mb-16 md:mb-24">
         <h1 className="text-5xl sm:text-7xl md:text-9xl lg:text-[120px] leading-[0.9] font-black text-black uppercase mb-8 tracking-[-0.04em]">
@@ -139,6 +154,62 @@ const About = () => {
             <span className="font-black text-sm uppercase tracking-widest">{item.label}</span>
           </div>
         ))}
+      </div>
+
+      {/* PRINT-ONLY RESUME STRUCTURE */}
+      <div className="print-only p-8 font-serif">
+        <div className="border-b-8 border-black pb-4 mb-8">
+          <h1 className="text-6xl font-black uppercase text-black">{PERSONAL_INFO.fullName}</h1>
+          <p className="text-xl font-bold uppercase tracking-widest mt-2">{PERSONAL_INFO.education}</p>
+          <div className="flex gap-4 text-sm mt-4">
+             <span>{PERSONAL_INFO.email}</span>
+             <span>{PERSONAL_INFO.location}</span>
+          </div>
+        </div>
+
+        <section className="mb-12">
+          <h2 className="text-2xl font-black uppercase border-b-4 border-black mb-4">Experience Path</h2>
+          {EXPERIENCE.map((exp, i) => (
+            <div key={i} className="mb-6">
+              <div className="flex justify-between font-bold text-lg">
+                <span>{exp.role} @ {exp.company}</span>
+                <span>{exp.period}</span>
+              </div>
+              <p className="mt-1 text-sm">{exp.description}</p>
+            </div>
+          ))}
+        </section>
+
+        <section className="mb-12">
+          <h2 className="text-2xl font-black uppercase border-b-4 border-black mb-4">Technical Stack</h2>
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <h3 className="font-bold uppercase text-sm border-b border-black mb-2">Systems</h3>
+              <p className="text-xs">React, TypeScript, Node.js, Firebase</p>
+            </div>
+            <div>
+              <h3 className="font-bold uppercase text-sm border-b border-black mb-2">Intelligence</h3>
+              <p className="text-xs">Gemini API, LLM Engineering, Neural Architectures</p>
+            </div>
+            <div>
+              <h3 className="font-bold uppercase text-sm border-b border-black mb-2">Philosophy</h3>
+              <p className="text-xs">Bauhaus Design, Grid Logic, Minimalism</p>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 className="text-2xl font-black uppercase border-b-4 border-black mb-4">Portfolio Archive</h2>
+          <div className="space-y-4">
+            {PROJECTS.slice(0, 3).map((p, i) => (
+              <div key={i}>
+                <p className="font-black uppercase tracking-tight">{p.title}</p>
+                <p className="text-xs">{p.description}</p>
+                <p className="text-[10px] font-bold uppercase text-gray-500">{p.tech.join(' | ')}</p>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { handleFirestoreError, OperationType } from '../lib/firestoreUtils';
 import Markdown from 'react-markdown';
 import { motion } from 'motion/react';
 import { ArrowLeft, Calendar, User, Clock } from 'lucide-react';
@@ -26,6 +27,8 @@ const BlogPost = () => {
   useEffect(() => {
     const fetchPost = async () => {
       if (!id) return;
+      const path = `blogs/${id}`;
+      setLoading(true);
       try {
         const docRef = doc(db, 'blogs', id);
         const docSnap = await getDoc(docRef);
@@ -36,7 +39,7 @@ const BlogPost = () => {
           navigate('/blog');
         }
       } catch (error) {
-        console.error("Error fetching post:", error);
+        handleFirestoreError(error, OperationType.GET, path);
       } finally {
         setLoading(false);
       }

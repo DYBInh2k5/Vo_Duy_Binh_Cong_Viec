@@ -1,11 +1,15 @@
 {
   "nav": {
     "home": "Trang chủ",
+    "profile": "Hồ sơ",
+    "works": "Dự án",
+    "labs": "Labs",
     "about": "Giới thiệu",
     "projects": "Dự án",
     "experience": "Kinh nghiệm",
     "capabilities": "Kỹ năng",
     "playground": "Sáng tạo",
+    "dashboard": "Điều khiển",
     "contact": "Liên hệ",
     "blog": "Blog",
     "admin": "Quản trị"
