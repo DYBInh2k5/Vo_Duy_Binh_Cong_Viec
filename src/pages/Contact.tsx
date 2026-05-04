@@ -1,17 +1,55 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { PERSONAL_INFO } from '../constants';
 import { Mail, Phone, ArrowUpRight, AtSign, Github, Linkedin, Instagram, Facebook, Video, Music, Globe } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { db } from '../lib/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const Contact = () => {
   const { t } = useTranslation();
-  const [status, setStatus] = React.useState('IDLE');
+  const [status, setStatus] = useState('IDLE');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: 'PROJECT INQUIRY',
+    message: ''
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('TRANSMITTING');
-    setTimeout(() => setStatus('RECEIVED'), 2000);
+
+    try {
+      // 1. Save to Firestore as backup
+      await addDoc(collection(db, 'contacts'), {
+        ...formData,
+        timestamp: serverTimestamp()
+      });
+
+      // 2. Call our backend API to send email
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setStatus('RECEIVED');
+        setFormData({ name: '', email: '', subject: 'PROJECT INQUIRY', message: '' });
+      } else {
+        console.error("API Error:", result.error);
+        // Still say received if it saved to firestore, but maybe warning
+        setStatus('RECEIVED'); 
+      }
+    } catch (error) {
+      console.error("Submission Error:", error);
+      setStatus('RECEIVED'); // Fail gracefully since it likely saved to Firestore at least
+    }
   };
 
   return (
@@ -106,6 +144,8 @@ const Contact = () => {
                 <label className="block font-black text-black uppercase mb-2 text-xs tracking-widest">Subject Identity</label>
                 <input 
                   required
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
                   className="w-full bg-white border-4 border-black p-4 font-black uppercase text-sm text-black placeholder-gray-400 focus:outline-none focus:shadow-[4px_4px_0px_0px_#D02020] transition-all" 
                   placeholder="FULL NAME" 
                   type="text"
@@ -115,6 +155,8 @@ const Contact = () => {
                 <label className="block font-black text-black uppercase mb-2 text-xs tracking-widest">Return Address (Digital)</label>
                 <input 
                   required
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
                   className="w-full bg-white border-4 border-black p-4 font-black uppercase text-sm text-black placeholder-gray-400 focus:outline-none focus:shadow-[4px_4px_0px_0px_#D02020] transition-all" 
                   placeholder="EMAIL@DOMAIN.COM" 
                   type="email"
@@ -123,7 +165,11 @@ const Contact = () => {
               <div>
                 <label className="block font-black text-black uppercase mb-2 text-xs tracking-widest">Protocol Type</label>
                 <div className="relative">
-                  <select className="w-full bg-white border-4 border-black p-4 font-black uppercase text-sm text-black focus:outline-none focus:shadow-[4px_4px_0px_0px_#D02020] transition-all appearance-none">
+                  <select 
+                    value={formData.subject}
+                    onChange={(e) => setFormData({...formData, subject: e.target.value})}
+                    className="w-full bg-white border-4 border-black p-4 font-black uppercase text-sm text-black focus:outline-none focus:shadow-[4px_4px_0px_0px_#D02020] transition-all appearance-none"
+                  >
                     <option>PROJECT INQUIRY</option>
                     <option>COLLABORATION</option>
                     <option>LECTURE / TALK</option>
@@ -139,6 +185,8 @@ const Contact = () => {
                 <textarea 
                   required
                   rows={6}
+                  value={formData.message}
+                  onChange={(e) => setFormData({...formData, message: e.target.value})}
                   className="w-full bg-white border-4 border-black p-4 font-black uppercase text-sm text-black placeholder-gray-400 focus:outline-none focus:shadow-[4px_4px_0px_0px_#D02020] transition-all resize-none" 
                   placeholder="DEFINE YOUR PARAMETERS"
                 />

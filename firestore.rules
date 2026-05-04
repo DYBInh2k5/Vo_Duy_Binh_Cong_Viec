@@ -28,5 +28,11 @@ service cloud.firestore {
       allow read: if resource.data.published == true || (isSignedIn() && request.auth.token.email == "binhvo20055@gmail.com");
       allow write: if isSignedIn() && request.auth.token.email == "binhvo20055@gmail.com";
     }
+
+    // Contacts: Public write (rate limited in real apps), Admin read
+    match /contacts/{contactId} {
+      allow create: if true;
+      allow read, update, delete: if isSignedIn() && request.auth.token.email == "binhvo20055@gmail.com";
+    }
   }
 }
