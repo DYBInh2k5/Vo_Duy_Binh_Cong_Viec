@@ -45,6 +45,19 @@
         "published": { "type": "boolean" }
       },
       "required": ["title", "content", "date"]
+    },
+    "ContactMessage": {
+      "title": "Contact Message",
+      "description": "Message from the contact form",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "subject": { "type": "string" },
+        "message": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "message"]
     }
   },
   "firestore": {
@@ -59,6 +72,10 @@
     "/blogs/{blogId}": {
       "schema": "BlogPost",
       "description": "Blog articles"
+    },
+    "/contacts/{contactId}": {
+      "schema": "ContactMessage",
+      "description": "User messages from contact form"
     }
   }
 }
