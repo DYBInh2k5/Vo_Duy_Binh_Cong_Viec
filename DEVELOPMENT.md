@@ -2,19 +2,21 @@
 
 This document tracks the evolution of the coDY Portfolio project from its initial generation to its current state.
 
-## 2026-05-03: Version 1.3.0 (Current)
-### Updates
-- **Deployment Prep:** Added `vercel.json` to handle SPA routing (rewrites to `index.html`). This ensures that deep links (e.g., `/projects`, `/experience`) work correctly when deployed to Vercel.
-- **Documentation:** Updated `DEVELOPMENT.md` to version 1.3.0.
+## 2026-05-04: Version 2.0.0 (Full-Stack & Firebase)
+### Major Transitions
+- **Full-Stack Architecture:** Migrated from SPA to a hybrid Express + Vite server. This enables secure backend operations like SMTP email handling via Nodemailer.
+- **Backend Sync:** Integrated `server.ts` to handle `/api/contact` requests, ensuring reliable email transmission to `binhvo20055@gmail.com`.
+- **Firebase God-Mode:** 
+    - **App Check:** Implemented reCAPTCHA v3 protection to secure the Firebase SDK.
+    - **Remote Config:** Added a global maintenance mode and dynamic theme control.
+    - **Messaging:** Set up FCM for push notifications (Background + Foreground support).
+    - **Cloud Functions:** Drafted serverless triggers for contact processing and image optimization.
+- **Security:** Hardened `firestore.rules` to prevent unauthorized access while allowing public contact form submissions.
 
-## 2026-05-03: Version 1.2.0
+## 2026-05-03: Version 1.3.0
 ### Updates
-- **Experience Overhaul:** Replaced generic placeholder experience with real career history:
-    - AI Engineer Intern (Jan 2026 - Present)
-    - Production Assistant at Cty CP Truyền Thông Ống Ngắm
-    - Frontend, Flutter, Data Analyst internships
-    - IT Support and Freelance history.
-- **Documentation:** Added `ARCHITECTURE.md`, `DATABASE_SCHEMA.md`, and `DEVELOPMENT.md`.
+- **Deployment Prep:** Added `vercel.json` to handle SPA routing (rewrites to `index.html`).
+- **Documentation:** Initial documentation suite (Architecture, Database, Roadmap).
 
 ## 2026-05-03: Version 1.1.0
 ### Updates

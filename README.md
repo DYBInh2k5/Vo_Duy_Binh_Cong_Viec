@@ -17,11 +17,14 @@ This application is strictly built on Bauhaus principles:
 
 ## 🛠️ Technical Stack
 - **Framework**: [React 18](https://reactjs.org/) + [Vite](https://vitejs.dev/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/) (Brutalist pattern)
+- **Server**: [Express](https://expressjs.com/) (Node.js)
+- **Database**: [Firebase Firestore](https://firebase.google.com/docs/firestore)
+- **Logic**: [Firebase Cloud Functions](https://firebase.google.com/docs/functions)
+- **Security**: [Firebase App Check](https://firebase.google.com/docs/app-check) (reCAPTCHA v3)
+- **Communication**: [Firebase Messaging (FCM)](https://firebase.google.com/docs/cloud-messaging)
+- **Mailing**: [Nodemailer](https://nodemailer.com/) (SMTP via Gmail)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) (Brutalist Bauhaus pattern)
 - **Animations**: [Framer Motion](https://www.framer.com/motion/)
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **Routing**: [React Router 6](https://reactrouter.com/)
-- **Language**: TypeScript
 
 ---
 

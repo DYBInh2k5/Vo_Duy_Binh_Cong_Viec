@@ -6,55 +6,63 @@ This document outlines the technical architecture and organization of the coDY P
 
 - **Framework:** React 18+
 - **Build Tool:** Vite
+- **Server:** Express (Node.js) via `tsx`
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS (Modern Bauhaus Aesthetic)
 - **Animations:** Framer Motion (`motion/react`)
-- **Icons:** Lucide React
-- **Typeface:** Inter, Space Grotesk
+- **Backend Services:** Firebase (FireStore, Auth, Storage, Remote Config, Cloud Functions, Messaging)
+- **Email:** Nodemailer (SMTP/Gmail)
 
 ## Project Structure
 
 ```text
 /
-├── public/                 # Static assets (images, favicon)
+├── firebase/               # Firebase Cloud Functions and setup
+├── public/                 # Static assets and Service Workers
 │   └── profile_cody.jpg    # Main profile picture
 ├── src/
 │   ├── components/         # Reusable UI components
 │   │   ├── Navbar.tsx      # Global navigation
-│   │   └── Footer.tsx      # Dynamic footer with social links
+│   │   ├── Footer.tsx      # Dynamic footer with social links
+│   │   └── PushNotificationManager.tsx # Firebase Messaging UI
 │   ├── pages/              # Main route views
 │   │   ├── Home.tsx        # Bauhaus-style landing page
-│   │   ├── Projects.tsx    # Gallery of works
-│   │   ├── About.tsx       # Biography and portrait
-│   │   ├── Experience.tsx  # Timeline-based resume
-│   │   ├── Capabilities.tsx # Skill visualization
-│   │   ├── Playground.tsx  # Experiments and side projects
-│   │   └── Contact.tsx     # Outreach and location info
+│   │   └── ...             # Other modular pages
+│   ├── hooks/              # Custom React Hooks (Remote Config, etc.)
+│   ├── lib/                # Shared libraries (Firebase init)
 │   ├── constants.ts        # CENTRAL DATA STORE (SSoT)
-│   ├── App.tsx             # Main routing and layout
+│   ├── App.tsx             # Main routing, layout, and Global Maintenance mode
 │   ├── main.tsx            # Entry point
 │   └── index.css           # Global styles and Tailwind imports
+├── server.ts               # Express Backend (API routes + Vite Middleware)
+├── firestore.rules         # Security Rules for Firestore
 ├── metadata.json           # App metadata and permissions
-└── package.json            # Dependencies and scripts
+└── package.json            # Dependencies and scripts (Full-stack)
 ```
 
 ## Architectural Design Patterns
 
-### 1. Single Source of Truth (SSoT)
-All content (Projects, Experience, Skills, Personal Info) is centralized in `/src/constants.ts`. This allows for easy maintenance and potential future migration to a CMS or dynamic database.
+### 1. Hybrid Full-Stack (Express + Vite)
+The application uses an Express server to handle backend logic (like sending secure emails via Nodemailer) while serving the React frontend using Vite middleware in development or static serving in production.
 
-### 2. Bauhaus Aesthetic System
+### 2. Firebase Integration (The Brain)
+- **Firestore:** Structured data storage for contacts and blog posts.
+- **Auth:** Google Identity for administrative access.
+- **Remote Config:** Dynamic control over UI (e.g., Maintenance Mode, Theme Accents).
+- **Messaging (FCM):** Push notifications for real-time engagement.
+- **App Check:** reCAPTCHA v3 protection for backend resources.
+- **Cloud Functions:** Serverless logic for image processing and automated responses.
+
+### 3. Bauhaus Aesthetic System
 - **Grid-Based Layouts:** Strong use of borders and geometric alignment.
 - **Strict Color Palette:** `bauhaus-red`, `bauhaus-yellow`, `bauhaus-blue`, and `bauhaus-black`.
-- **High Contrast:** Heavy use of black borders and shadows (`shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]`).
+- **High Contrast:** Heavy use of black borders and shadows.
 
-### 3. Motion System
-Using Framer Motion for:
-- Page transitions (fade-in, slide-up).
-- Hover effects on cards and buttons.
-- Staggered entrances for list items.
+### 4. Motion System
+Using Framer Motion for page transitions and micro-interactions.
 
 ## Data Flow
-1. Data is defined in `constants.ts`.
-2. Pages import specific constants (e.g., `PROJECTS`, `EXPERIENCE`).
-3. Components receive data via props or direct imports to render UI.
+1. **Static Content:** Defined in `constants.ts` for speed and SEO.
+2. **Dynamic Content:** Fetched from Firestore via Firebase SDK.
+3. **Backend Logic:** Frontend calls `/api/*` endpoints on the Express server.
+4. **Real-time:** FCM push notifications and Firestore `onSnapshot` listeners.
