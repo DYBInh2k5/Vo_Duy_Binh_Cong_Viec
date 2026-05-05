@@ -58,6 +58,19 @@
         "timestamp": { "type": "string", "format": "date-time" }
       },
       "required": ["name", "email", "message"]
+    },
+    "GuestbookEntry": {
+      "title": "Guestbook Entry",
+      "description": "Public message from guest",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userPhoto": { "type": "string" },
+        "message": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "userName", "message", "timestamp"]
     }
   },
   "firestore": {
@@ -76,6 +89,14 @@
     "/contacts/{contactId}": {
       "schema": "ContactMessage",
       "description": "User messages from contact form"
+    },
+    "/guestbook/{entryId}": {
+      "schema": "GuestbookEntry",
+      "description": "Public messages from visiting users"
+    },
+    "/admins/{uid}": {
+      "schema": { "type": "object", "properties": { "role": { "type": "string" } } },
+      "description": "Admin users"
     }
   }
 }

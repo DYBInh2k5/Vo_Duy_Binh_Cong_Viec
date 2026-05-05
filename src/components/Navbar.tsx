@@ -28,6 +28,8 @@ const Navbar = () => {
       label: t('nav.labs'), 
       links: [
         { name: t('nav.dashboard'), path: '/dashboard' },
+        { name: t('nav.guestbook'), path: '/guestbook' },
+        { name: t('nav.rubik'), path: '/rubik' },
         { name: t('nav.playground'), path: '/playground' }
       ]
     },

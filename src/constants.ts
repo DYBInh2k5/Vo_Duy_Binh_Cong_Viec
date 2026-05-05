@@ -6,7 +6,7 @@ export const PROJECTS = [
     description: "Automated multi-platform content generation with smart hashtag suggestions and performance analytics using GPT-4.",
     category: "AI",
     tech: ["Python", "OpenAI GPT-4", "FastAPI", "React", "TailwindCSS"],
-    image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=800&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=800&auto=format&fit=crop",
     link: "https://github.com/DYBInh2k5",
     color: "bauhaus-blue"
   },
@@ -17,7 +17,7 @@ export const PROJECTS = [
     description: "Multi-account management system with smart auto-reply chatbots and growth analytics for automated social engagement.",
     category: "Web",
     tech: ["Node.js", "TypeScript", "Express", "Puppeteer", "PostgreSQL"],
-    image: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=800&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1574169208507-84376144848b?q=80&w=800&auto=format&fit=crop",
     link: "https://github.com/DYBInh2k5",
     color: "bauhaus-red"
   },
@@ -28,7 +28,7 @@ export const PROJECTS = [
     description: "Real-time sales tracking and customer behavior analysis platform with revenue forecasting for online businesses.",
     category: "Web",
     tech: ["Next.js 14", "TypeScript", "PostgreSQL", "Redis", "AWS"],
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop",
     link: "https://github.com/DYBInh2k5",
     color: "bauhaus-yellow"
   },
@@ -39,7 +39,7 @@ export const PROJECTS = [
     description: "A production-ready pipeline for generating short-form video content using Diffusion models and automated editing tools.",
     category: "AI",
     tech: ["Python", "Stable Diffusion", "FFmpeg", "React", "Node.js"],
-    image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=800&auto=format&fit=crop",
     link: "https://github.com/DYBInh2k5",
     color: "bauhaus-blue"
   },
@@ -50,7 +50,7 @@ export const PROJECTS = [
     description: "Real-time monitoring and visualization of distributed neural networks, providing insights into computation costs and performance.",
     category: "Data",
     tech: ["Next.js", "D3.js", "WebSockets", "Python", "Kubernetes"],
-    image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc48?q=80&w=800&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=800&auto=format&fit=crop",
     link: "https://github.com/DYBInh2k5",
     color: "bauhaus-red"
   },
@@ -61,7 +61,7 @@ export const PROJECTS = [
     description: "An integrated security dashboard monitoring biometric data and network integrity, designed for high-security infrastructure environments.",
     category: "Security",
     tech: ["Go", "C++", "React", "Rust", "TensorFlow"],
-    image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop",
     link: "https://github.com/DYBInh2k5",
     color: "bauhaus-yellow"
   }

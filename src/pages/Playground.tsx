@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Trash2, Download, Play, RefreshCw, Layers, MousePointer2, Plus } from 'lucide-react';
-import { GoogleGenAI } from '@google/genai';
+import { toPng } from 'html-to-image';
 
 interface Shape {
   id: string;
@@ -41,42 +41,47 @@ const Playground = () => {
     setIsGenerating(true);
     
     try {
-      const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) throw new Error("API Key missing");
-      
-      const genAI = new GoogleGenAI({ apiKey });
-      const model = genAI.models.generateContent({
-        model: "gemini-1.5-flash",
-        contents: [{
-          role: "user",
-          parts: [{
-            text: `Act as a Bauhaus design engine. Based on the prompt "${prompt}", generate a list of 5-8 geometric shapes. 
-            Return ONLY a valid JSON array of objects with this structure: 
-            {"type": "circle"|"square"|"triangle", "x": 0-100, "y": 0-100, "size": 50-200, "color": "#D02020"|"#2850CE"|"#FFD700"|"#1C1B1B", "rotation": 0-360}
-            Do not include any markdown or text around the JSON.`
-          }]
-        }]
+      const response = await fetch('/api/generate-design', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
       });
 
-      const response = await model;
-      const text = response.text;
-      const jsonStr = text.replace(/```json|```/g, '').trim();
-      const generatedShapes = JSON.parse(jsonStr).map((s: any) => ({
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Generation failed");
+      }
+
+      const generatedShapesData = await response.json();
+      const generatedShapes = generatedShapesData.map((s: any) => ({
         ...s,
         id: Math.random().toString(36).substr(2, 9),
         opacity: 1
       }));
       
       setShapes(generatedShapes);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Neural grid failure. Please retry.");
+      alert(err.message || "Neural grid failure. Please retry.");
     } finally {
       setIsGenerating(false);
     }
   };
 
   const clearCanvas = () => setShapes([]);
+
+  const exportAsImage = async () => {
+    if (!canvasRef.current) return;
+    try {
+      const dataUrl = await toPng(canvasRef.current, { cacheBust: true, quality: 1 });
+      const link = document.createElement('a');
+      link.download = `bauhaus-composition-${Date.now()}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Export failed', err);
+    }
+  };
   
   const generateComposition = () => {
     const newShapes: Shape[] = [];
@@ -201,7 +206,11 @@ const Playground = () => {
 
           {/* Export Overlay */}
           <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
-             <button className="bg-black text-white p-4 border-2 border-black hover:bg-bauhaus-blue transition-all">
+             <button 
+                onClick={exportAsImage}
+                className="bg-black text-white p-4 border-2 border-black hover:bg-bauhaus-blue transition-all shadow-lg"
+                title="Download Composition"
+              >
                 <Download size={24} />
              </button>
           </div>

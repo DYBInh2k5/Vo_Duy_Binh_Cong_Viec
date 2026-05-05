@@ -4,6 +4,10 @@ import { motion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 import { PROJECTS } from '../constants';
 
+import { BauhausGraphic } from '../components/BauhausGraphic';
+import { WWELogo } from '../components/WWELogo';
+import { ThreeScene } from '../components/ThreeScene';
+
 const Home = () => {
   const featuredProjects = PROJECTS.slice(0, 3);
 
@@ -41,21 +45,11 @@ const Home = () => {
           </motion.div>
         </div>
 
-        {/* Hero Right Panel: Bauhaus Composition */}
-        <div className="lg:col-span-4 relative h-[500px] hidden lg:block">
-          <div className="absolute inset-0 flex items-center justify-center">
-            {/* Blue Circle */}
-            <div className="w-64 h-64 bg-bauhaus-blue rounded-full absolute -translate-x-12 -translate-y-12 border-4 border-black shadow-lg"></div>
-            {/* Red Square */}
-            <div className="w-72 h-72 bg-bauhaus-red absolute translate-x-4 translate-y-4 border-4 border-black shadow-lg"></div>
-            {/* Yellow Triangle */}
-            <div 
-              className="w-80 h-80 bg-bauhaus-yellow absolute translate-x-16 -translate-y-24 border-4 border-black shadow-lg" 
-              style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}
-            ></div>
-            {/* Decorative Lines */}
-            <div className="absolute w-full h-1 bg-black rotate-45"></div>
-            <div className="absolute w-full h-1 bg-black -rotate-45"></div>
+        {/* Hero Right Panel: Bauhaus 3D Composition */}
+        <div className="lg:col-span-4 relative h-[500px] hidden lg:block border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] bg-white overflow-hidden">
+          <ThreeScene />
+          <div className="absolute top-4 left-4 bg-black text-white px-2 py-1 font-mono text-xs uppercase tracking-widest z-10">
+            Interactive 3D Grid
           </div>
         </div>
       </section>

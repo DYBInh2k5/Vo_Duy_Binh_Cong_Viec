@@ -5,14 +5,15 @@ import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc } from '
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { handleFirestoreError, OperationType } from '../lib/firestoreUtils';
 import { PROJECTS, EXPERIENCE } from '../constants';
-import { Layout, Plus, Trash2, Edit2, LogOut, Save, RefreshCw, Layers, BookOpen, Briefcase, X, Upload } from 'lucide-react';
+import { Layout, Plus, Trash2, Edit2, LogOut, Save, RefreshCw, Layers, BookOpen, Briefcase, X, Upload, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 const Admin = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'projects' | 'experience' | 'blogs'>('projects');
+  const [activeTab, setActiveTab] = useState<'projects' | 'experience' | 'blogs' | 'contacts'>('projects');
   const [data, setData] = useState<any[]>([]);
+  const [contacts, setContacts] = useState<any[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState<any>(null);
@@ -31,8 +32,13 @@ const Admin = () => {
     if (!user) return;
     const path = activeTab;
     try {
-      const snapshot = await getDocs(collection(db, path));
-      setData(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+      if (path === 'contacts') {
+        const snapshot = await getDocs(collection(db, 'contacts'));
+        setContacts(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+      } else {
+        const snapshot = await getDocs(collection(db, path));
+        setData(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+      }
     } catch (error) {
       handleFirestoreError(error, OperationType.GET, path);
     }
@@ -178,6 +184,12 @@ const Admin = () => {
           >
             <BookOpen size={20} /> Blog Posts
           </button>
+          <button 
+            onClick={() => setActiveTab('contacts')}
+            className={`w-full flex items-center gap-4 p-4 font-black uppercase transition-all ${activeTab === 'contacts' ? 'bg-bauhaus-blue shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] text-white' : 'hover:bg-white/10'}`}
+          >
+            <MessageSquare size={20} /> Messages
+          </button>
         </nav>
 
         <div className="p-4 border-t-4 border-white/10">
@@ -222,7 +234,40 @@ const Admin = () => {
         </header>
 
         <div className="grid grid-cols-1 gap-6">
-          {data.length === 0 ? (
+          {activeTab === 'contacts' ? (
+             contacts.length === 0 ? (
+               <div className="p-20 border-4 border-dashed border-black text-center opacity-30">
+                 <p className="text-2xl font-black">NO MESSAGES IN ARCHIVE</p>
+               </div>
+             ) : (
+               contacts.map((msg, i) => (
+                 <motion.div
+                    key={msg.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="bg-white border-4 border-black p-6 hard-shadow"
+                 >
+                    <div className="flex justify-between mb-4 border-b-2 border-black pb-2">
+                       <h3 className="font-black uppercase">{msg.subject}</h3>
+                       <button 
+                          onClick={async () => {
+                            if(confirm("Delete this message?")) {
+                              await deleteDoc(doc(db, 'contacts', msg.id));
+                              fetchData();
+                            }
+                          }}
+                          className="text-bauhaus-red hover:scale-110"
+                       >
+                          <Trash2 size={18} />
+                       </button>
+                    </div>
+                    <p className="text-xs font-bold mb-4">From: {msg.name} ({msg.email})</p>
+                    <p className="font-medium text-gray-700 italic">"{msg.message}"</p>
+                    <p className="text-[10px] opacity-40 mt-4 font-mono">{msg.timestamp}</p>
+                 </motion.div>
+               ))
+             )
+          ) : data.length === 0 ? (
             <div className="p-20 border-4 border-dashed border-black text-center opacity-30">
               <p className="text-2xl font-black">NO DATA ENTRIES FOUND</p>
               <p>Run sync or click 'Add New' to begin.</p>

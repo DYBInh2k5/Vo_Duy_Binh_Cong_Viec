@@ -63,6 +63,35 @@ async function startServer() {
     }
   });
 
+  // Gemini Design Generation
+  app.post("/api/generate-design", async (req, res) => {
+    const { prompt } = req.body;
+    
+    try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) throw new Error("GEMINI_API_KEY is not configured on the server.");
+
+      const { GoogleGenAI } = await import("@google/genai");
+      const ai = new GoogleGenAI({ apiKey });
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: `Act as a Bauhaus design engine. Based on the prompt "${prompt}", generate a list of 5-8 geometric shapes. 
+            Return ONLY a valid JSON array of objects with this structure: 
+            {"type": "circle"|"square"|"triangle", "x": 0-100, "y": 0-100, "size": 50-200, "color": "#D02020"|"#2850CE"|"#FFD700"|"#1C1B1B", "rotation": 0-360}
+            Do not include any markdown or text around the JSON.`
+      });
+      
+      const text = response.text || "[]";
+      const jsonStr = text.replace(/```json|```/g, '').trim();
+      
+      res.json(JSON.parse(jsonStr));
+    } catch (error: any) {
+      console.error("Gemini Error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

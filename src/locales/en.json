@@ -10,6 +10,8 @@
     "capabilities": "Capabilities",
     "playground": "Playground",
     "dashboard": "Dashboard",
+    "guestbook": "Guestbook",
+    "rubik": "Rubik's Cube",
     "contact": "Contact",
     "blog": "Blog",
     "admin": "Admin"

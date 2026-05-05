@@ -4,6 +4,8 @@ import { PERSONAL_INFO, EXPERIENCE, PROJECTS } from '../constants';
 import { Terminal, Layout, Zap, Database, Brush, Accessibility, DraftingCompass, Brain, Shield, Rocket, Globe, FileText, Download } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { BauhausGraphic } from '../components/BauhausGraphic';
+
 const About = () => {
   const { t } = useTranslation();
 
@@ -28,14 +30,16 @@ const About = () => {
         <h1 className="text-5xl sm:text-7xl md:text-9xl lg:text-[120px] leading-[0.9] font-black text-black uppercase mb-8 tracking-[-0.04em]">
           {t('about.hero').split('\n')[0]}<br />{t('about.hero').split('\n')[1]}
         </h1>
-        <div className="w-full h-1 bg-black"></div>
+        <div className="md:col-span-7 flex justify-end">
+           <BauhausGraphic className="w-full h-8 mb-8" seed="divider" />
+        </div>
       </header>
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-16 items-start">
         {/* Left: Portrait */}
         <div className="md:col-span-5 relative">
-          <div className="border-[16px] border-bauhaus-red p-0 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] bg-black">
+          <div className="relative z-10 border-[16px] border-bauhaus-red p-0 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] bg-black">
             <img 
               alt="Võ Duy Bình (coDY) Portrait" 
               className="w-full grayscale contrast-125 block hover:grayscale-0 transition-all duration-700" 
@@ -43,7 +47,7 @@ const About = () => {
             />
           </div>
           {/* Bauhaus Geometric Element */}
-          <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-bauhaus-yellow border-4 border-black z-[-1]"></div>
+          <BauhausGraphic className="absolute -bottom-12 -left-12 w-48 h-48 z-0 rotate-12" seed="portrait-bk" />
         </div>
 
         {/* Right: Content Panels */}
