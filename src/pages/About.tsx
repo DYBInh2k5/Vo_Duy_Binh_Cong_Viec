@@ -3,22 +3,18 @@ import { motion } from 'motion/react';
 import { PERSONAL_INFO, EXPERIENCE, PROJECTS } from '../constants';
 import { Terminal, Layout, Zap, Database, Brush, Accessibility, DraftingCompass, Brain, Shield, Rocket, Globe, FileText, Download } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-
 import { BauhausGraphic } from '../components/BauhausGraphic';
+import { generateResumePDF } from '../services/resumeService';
 
 const About = () => {
   const { t } = useTranslation();
-
-  const handlePrint = () => {
-    window.print();
-  };
 
   return (
     <div className="max-w-7xl mx-auto px-8 pt-24 pb-24 relative">
       {/* Resume Download Action */}
       <div className="flex justify-end mb-8 no-print">
         <button
-          onClick={handlePrint}
+          onClick={generateResumePDF}
           className="bg-black text-white px-8 py-4 font-black uppercase tracking-widest border-4 border-black hard-shadow hover:bg-bauhaus-red hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-2"
         >
           <FileText size={20} /> Generate PDF Resume

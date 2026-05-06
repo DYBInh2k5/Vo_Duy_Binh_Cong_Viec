@@ -2,6 +2,8 @@ import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import { CustomCursor } from './components/CustomCursor';
+import { BackgroundDynamics } from './components/BackgroundDynamics';
 import { ThemeProvider } from './context/ThemeContext';
 import { useRemoteConfig } from './hooks/useRemoteConfig';
 import { AlertTriangle } from 'lucide-react';
@@ -43,6 +45,8 @@ function App() {
   return (
     <ThemeProvider>
       <Router>
+        <CustomCursor />
+        <BackgroundDynamics />
         <div className="flex flex-col min-h-screen transition-all duration-500">
           <Navbar />
           <main className="flex-grow">

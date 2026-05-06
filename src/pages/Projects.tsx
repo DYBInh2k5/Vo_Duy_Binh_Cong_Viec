@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Star, ArrowRight, Github, ExternalLink, GitBranch, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useSEO } from '../hooks/useSEO';
 
 const Projects = () => {
   const { t } = useTranslation();
@@ -11,6 +12,12 @@ const Projects = () => {
   const [repos, setRepos] = useState<any[]>([]);
   const [reposLoading, setReposLoading] = useState(true);
   const categories = ['ALL', 'AI', 'WEB', 'MOBILE'];
+
+  useSEO({
+    title: 'Projects Archive',
+    description: 'Explore a curated archive of AI, Web, and Mobile projects by Võ Duy Bình (coDY). From robust technical architecture to avant-garde visual aesthetics.',
+    keywords: ['AI Projects', 'Web Development', 'Mobile Apps', 'React Portfolio', 'coDY Projects']
+  });
 
   useEffect(() => {
     const fetchRepos = async () => {

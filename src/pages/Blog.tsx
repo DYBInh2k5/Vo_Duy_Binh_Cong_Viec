@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Calendar, Tag, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useSEO } from '../hooks/useSEO';
 
 interface BlogPost {
   id: string;
@@ -20,6 +21,12 @@ const Blog = () => {
   const { t } = useTranslation();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useSEO({
+    title: 'Research & Blog',
+    description: 'Exploring AI, Automation, and the future of Media. Insights and articles by Võ Duy Bình (coDY) on AI engineering and digital innovation.',
+    keywords: ['AI blog', 'Automation', 'Digital Media', 'coDY Blog', 'AI Engineering']
+  });
 
   useEffect(() => {
     const fetchPosts = async () => {

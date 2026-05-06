@@ -38,6 +38,8 @@ If you are opening this project in AI Studio to continue development, you can in
 > "I have imported my portfolio. Please scan the `src/pages` and `src/constants.ts` to understand the current structure and coDY's personal data. Ensure all new features respect the Bauhaus design system defined in `tailwind.config.js` and `index.css`."
 
 ### Local Development:
+Xem hướng dẫn chi tiết tại [ANTIGRAVITY_LOCAL_GUIDE.md](./ANTIGRAVITY_LOCAL_GUIDE.md).
+
 1. Clone the repository.
 2. Install dependencies:
    ```bash

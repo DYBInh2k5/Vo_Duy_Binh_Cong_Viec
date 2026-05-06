@@ -3,11 +3,19 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { PROJECTS } from '../constants';
 import { motion } from 'motion/react';
 import { ArrowLeft, Boxes, Cpu, Layout, CheckCircle2 } from 'lucide-react';
+import { useSEO } from '../hooks/useSEO';
 
 const ProjectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const project = PROJECTS.find(p => p.id === id);
+
+  useSEO({
+    title: project?.title,
+    description: project?.description,
+    keywords: project?.tech,
+    image: project?.image
+  });
 
   if (!project) {
     return (
@@ -57,59 +65,51 @@ const ProjectDetail = () => {
         </div>
 
         {/* Narrative Section */}
-        <div className="lg:col-span-7 space-y-12">
-          <section>
-            <h2 className="text-3xl font-black uppercase border-b-4 border-black pb-2 mb-6 flex items-center gap-4">
-               <Boxes className="text-bauhaus-red" /> The Objective
-            </h2>
-            <p className="text-xl font-bold leading-relaxed">{project.description}</p>
-          </section>
+        <div className="lg:col-span-12 space-y-24">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <section className="border-4 border-black p-8 bg-white hard-shadow">
+              <h2 className="text-4xl font-black uppercase mb-6 flex items-center gap-4 text-bauhaus-red">
+                 <Boxes size={32} /> THE CHALLENGE
+              </h2>
+              <div className="space-y-4">
+                <p className="text-xl font-bold leading-relaxed">{project.description}</p>
+                <p className="font-bold opacity-60">The primary friction point was optimizing the neural data flow while maintaining structural integrity in a high-concurrency environment.</p>
+              </div>
+            </section>
 
-          <section>
-            <h2 className="text-3xl font-black uppercase border-b-4 border-black pb-2 mb-6 flex items-center gap-4">
-               <Cpu className="text-bauhaus-blue" /> Neural Architecture
-            </h2>
-            <div className="bg-black text-green-500 p-8 font-mono text-sm border-4 border-black hard-shadow-lg">
-              <pre className="whitespace-pre-wrap">
-{`{
-  "engine": "V.02_Core",
-  "data_flow": [
-    "Input_Vector_Analysis",
-    "Semantic_Embedding_Mapping",
-    "Geometric_Translation_Logic",
-    "Final_Bento_Composition"
-  ],
-  "dependencies": ${JSON.stringify(project.tech, null, 2)},
-  "status": "Production_Stable"
-}`}
-              </pre>
+            <section className="border-4 border-black p-8 bg-bauhaus-off-white hard-shadow">
+              <h2 className="text-4xl font-black uppercase mb-6 flex items-center gap-4 text-bauhaus-blue">
+                 <Cpu size={32} /> THE AI SOLUTION
+              </h2>
+              <div className="space-y-4 font-bold">
+                 <p>Implemented a custom LLM pipeline for automated validation of geometric logic. Used RAG (Retrieval-Augmented Generation) to ground the AI's creative output in established Bauhaus principles.</p>
+                 <div className="bg-black text-green-500 p-6 font-mono text-xs hard-shadow border-2 border-black">
+                   <p className="mb-2">// Optimizing Neural Weights...</p>
+                   <p>model.optimize(bauhaus_constraint=True)</p>
+                   <p>grid.align(strictly=True)</p>
+                 </div>
+              </div>
+            </section>
+          </div>
+
+          <section className="border-8 border-black p-12 bg-bauhaus-yellow hard-shadow-lg relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-10">
+               <CheckCircle2 size={120} />
+            </div>
+            <h2 className="text-5xl font-black uppercase mb-12 relative z-10">QUANTIFIABLE RESULTS</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+               {[
+                 { label: 'Latency Efficiency', val: '40% Reduction' },
+                 { label: 'Data Accuracy', val: '99.8% Logged' },
+                 { label: 'User Engagement', val: '+250% Growth' }
+               ].map((res, i) => (
+                 <div key={i} className="border-4 border-black bg-white p-6 hard-shadow">
+                    <p className="text-[10px] font-black uppercase tracking-widest mb-2 opacity-50">{res.label}</p>
+                    <p className="text-3xl font-black uppercase italic">{res.val}</p>
+                 </div>
+               ))}
             </div>
           </section>
-        </div>
-
-        {/* Side Panel: Results */}
-        <div className="lg:col-span-5 space-y-8">
-          <div className="bg-bauhaus-yellow border-4 border-black p-8 hard-shadow">
-            <h3 className="font-black uppercase tracking-widest text-xs border-b-2 border-black pb-2 mb-6">Outcome Log</h3>
-            <ul className="space-y-4">
-              {[
-                "100% Structural Consistency",
-                "Neural Latency Reduced by 40%",
-                "Geometric Accuracy Validated",
-                "User Sentiment: High"
-              ].map((res, i) => (
-                <li key={i} className="flex items-center gap-4 font-black uppercase text-sm italic">
-                  <CheckCircle2 size={20} className="text-bauhaus-red" />
-                  {res}
-                </li>
-              ))}
-            </ul>
-          </div>
-          
-          <div className="border-4 border-black p-8 bg-white hard-shadow">
-             <h3 className="font-black text-bauhaus-blue mb-4 uppercase italic">"The grid is the soul of modular efficiency. This project embodies that mandate."</h3>
-             <p className="text-xs font-black uppercase opacity-40">-- coDY Architecture System</p>
-          </div>
         </div>
       </div>
     </div>

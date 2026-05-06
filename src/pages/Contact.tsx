@@ -5,6 +5,7 @@ import { Mail, Phone, ArrowUpRight, AtSign, Github, Linkedin, Instagram, Faceboo
 import { useTranslation } from 'react-i18next';
 import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { Newsletter } from '../components/Newsletter';
 
 const Contact = () => {
   const { t } = useTranslation();
@@ -246,6 +247,11 @@ const Contact = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Newsletter Section */}
+      <div className="mt-32">
+        <Newsletter />
       </div>
     </div>
   );

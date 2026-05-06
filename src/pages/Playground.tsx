@@ -1,7 +1,38 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Trash2, Download, Play, RefreshCw, Layers, MousePointer2, Plus } from 'lucide-react';
+import { Sparkles, Trash2, Download, Play, RefreshCw, Layers, MousePointer2, Plus, MessageSquare, Terminal, Send } from 'lucide-react';
 import { toPng } from 'html-to-image';
+import { getCodyResponse, generateBauhausDesign } from '../services/geminiService';
+
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+}
+
+interface PromptExample {
+  title: string;
+  category: string;
+  prompt: string;
+}
+
+const PROMPT_LIBRARY: PromptExample[] = [
+  {
+    title: 'Bauhaus Composition',
+    category: 'Design',
+    prompt: 'A struggle between tension and balance using only squares and thin lines.'
+  },
+  {
+    title: 'Content Automation',
+    category: 'Growth',
+    prompt: 'Generate a 15-second hook for a tech review on TikTok targeting Gen Z.'
+  },
+  {
+    title: 'Code Optimizer',
+    category: 'Engineering',
+    prompt: 'Refactor this React component for maximum performance using useMemo and useCallback.'
+  }
+];
 
 interface Shape {
   id: string;
@@ -18,9 +49,21 @@ const Playground = () => {
   const [shapes, setShapes] = useState<Shape[]>([]);
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  
+  // Chatbot State
+  const [chatInput, setChatInput] = useState('');
+  const [messages, setMessages] = useState<Message[]>([
+    { role: 'assistant', content: 'SYSTEM INITIALIZED. I AM CODY AI. HOW CAN I ASSIST YOUR CREATIVE LOGIC TODAY?', timestamp: new Date() }
+  ]);
+  const [isTyping, setIsTyping] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  
   const canvasRef = useRef<HTMLDivElement>(null);
-
   const colors = ['#D02020', '#2850CE', '#FFD700', '#1C1B1B', '#FCF9F8'];
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const addShape = (type: Shape['type']) => {
     const newShape: Shape = {
@@ -41,30 +84,38 @@ const Playground = () => {
     setIsGenerating(true);
     
     try {
-      const response = await fetch('/api/generate-design', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Generation failed");
-      }
-
-      const generatedShapesData = await response.json();
-      const generatedShapes = generatedShapesData.map((s: any) => ({
+      const generatedShapes = await generateBauhausDesign(prompt);
+      const shapesWithIds = generatedShapes.map((s: any) => ({
         ...s,
         id: Math.random().toString(36).substr(2, 9),
         opacity: 1
       }));
-      
-      setShapes(generatedShapes);
+      setShapes(shapesWithIds);
     } catch (err: any) {
       console.error(err);
-      alert(err.message || "Neural grid failure. Please retry.");
+      alert("Neural grid failure. Please retry.");
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleChat = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatInput.trim() || isTyping) return;
+
+    const userMessage: Message = { role: 'user', content: chatInput, timestamp: new Date() };
+    setMessages(prev => [...prev, userMessage]);
+    setChatInput('');
+    setIsTyping(true);
+
+    try {
+      const response = await getCodyResponse(chatInput);
+      const assistantMessage: Message = { role: 'assistant', content: response || '', timestamp: new Date() };
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsTyping(false);
     }
   };
 
@@ -108,111 +159,210 @@ const Playground = () => {
       <header className="mb-12">
         <div className="flex items-center gap-4 mb-4">
           <div className="w-12 h-12 bg-bauhaus-red border-4 border-black shrink-0"></div>
-          <h1 className="text-6xl md:text-8xl font-black uppercase tracking-tighter">LAB / <span className="text-bauhaus-blue">01</span></h1>
+          <h1 className="text-6xl md:text-8xl font-black uppercase tracking-tighter">LAB / <span className="text-bauhaus-blue">PLAYGROUND</span></h1>
         </div>
-        <p className="text-xl font-bold uppercase italic tracking-tight opacity-60">Bauhaus Generative Composition Engine</p>
+        <p className="text-xl font-bold uppercase italic tracking-tight opacity-60">Interactive AI Experiments & Geometric Logic</p>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Controls Sidebar */}
+        {/* Left Column: AI Assistant & Prompts */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="border-4 border-black p-6 bg-white hard-shadow">
-            <h3 className="font-black uppercase tracking-widest text-xs mb-4 border-b-2 border-black pb-2">Neural Input</h3>
-            <textarea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="e.g., 'Anxious geometric struggle' or 'Calm circular balance'..."
-              className="w-full h-32 p-4 border-2 border-black font-bold focus:bg-bauhaus-yellow outline-none transition-colors"
-            />
-            <button
-              onClick={handleGenerate}
-              disabled={isGenerating || !prompt.trim()}
-              className="w-full mt-4 bg-bauhaus-black text-white py-4 font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-bauhaus-red transition-all disabled:opacity-50"
-            >
-              {isGenerating ? <RefreshCw className="animate-spin" /> : <Sparkles size={20} />}
-              Execute Generation
-            </button>
+          {/* coDY AI Persona */}
+          <div className="border-4 border-black bg-white hard-shadow flex flex-col h-[500px]">
+             <div className="p-4 border-b-4 border-black bg-bauhaus-black text-white flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                   <MessageSquare size={18} />
+                   <h3 className="font-black uppercase tracking-widest text-xs">coDY AI PERSONA [v2.0]</h3>
+                </div>
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+             </div>
+             
+             <div className="flex-1 overflow-y-auto p-4 space-y-4 font-mono text-sm custom-scrollbar">
+                {messages.map((msg, i) => (
+                   <motion.div 
+                    key={i}
+                    initial={{ opacity: 0, x: msg.role === 'user' ? 20 : -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
+                   >
+                     <p className="text-[10px] uppercase font-black mb-1 opacity-40">{msg.role === 'user' ? 'USER_INPUT' : 'CODY_SYSTEM'}</p>
+                     <div className={`p-3 border-2 border-black max-w-[85%] ${msg.role === 'user' ? 'bg-bauhaus-yellow' : 'bg-bauhaus-off-white'}`}>
+                        {msg.content}
+                     </div>
+                   </motion.div>
+                ))}
+                {isTyping && (
+                  <div className="flex gap-2 p-2">
+                    <div className="w-2 h-2 bg-black animate-bounce [animation-delay:-0.3s]"></div>
+                    <div className="w-2 h-2 bg-black animate-bounce [animation-delay:-0.15s]"></div>
+                    <div className="w-2 h-2 bg-black animate-bounce"></div>
+                  </div>
+                )}
+                <div ref={chatEndRef} />
+             </div>
+
+             <form onSubmit={handleChat} className="p-4 border-t-4 border-black bg-white flex gap-2">
+                <input 
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  placeholder="Ask coDY anything..."
+                  className="flex-1 font-bold outline-none uppercase text-xs"
+                />
+                <button type="submit" className="bg-black text-white p-2 hover:bg-bauhaus-red transition-colors">
+                  <Send size={18} />
+                </button>
+             </form>
           </div>
 
+          {/* Prompt Library */}
           <div className="border-4 border-black p-6 bg-white hard-shadow">
-            <h3 className="font-black uppercase tracking-widest text-xs mb-4 border-b-2 border-black pb-2">Manual Override</h3>
-            <div className="grid grid-cols-2 gap-2">
-              <ToolButton onClick={() => addShape('square')} icon={<Layers />} label="Block" />
-              <ToolButton onClick={() => addShape('circle')} icon={<RefreshCw />} label="Orbital" />
-              <ToolButton onClick={() => addShape('triangle')} icon={<Play className="rotate-[-90deg]" />} label="Vector" />
-              <ToolButton onClick={() => addShape('cross')} icon={<Plus />} label="Cross" />
-              <ToolButton onClick={() => addShape('frame')} icon={<div className="w-4 h-4 border-2 border-black" />} label="Frame" />
-              <button 
-                onClick={generateComposition}
-                className="bg-bauhaus-yellow border-2 border-black font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 hover:bg-black hover:text-white transition-all"
-              >
-                Auto Composition
-              </button>
+            <h3 className="font-black uppercase tracking-widest text-xs mb-4 border-b-2 border-black pb-2">Prompt Library</h3>
+            <div className="space-y-3">
+               {PROMPT_LIBRARY.map((item, i) => (
+                 <button 
+                  key={i}
+                  onClick={() => setPrompt(item.prompt)}
+                  className="w-full text-left p-3 border-2 border-black hover:bg-bauhaus-off-white transition-all group"
+                 >
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-[10px] font-black uppercase text-bauhaus-blue">{item.category}</span>
+                      <Terminal size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                    <p className="font-bold text-xs leading-tight">{item.title}</p>
+                 </button>
+               ))}
             </div>
-            <button
-              onClick={clearCanvas}
-              className="w-full mt-6 border-2 border-black py-2 font-black uppercase text-xs hover:bg-gray-100 flex items-center justify-center gap-2"
-            >
-              <Trash2 size={14} /> Clear Composition
-            </button>
           </div>
         </div>
 
-        {/* Canvas Area */}
-        <div className="lg:col-span-8 bg-bauhaus-off-white border-8 border-black relative aspect-square overflow-hidden hard-shadow-lg group">
-          <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(black 1px, transparent 0)', backgroundSize: '20px 20px' }}></div>
-          
-          <AnimatePresence>
-            {shapes.map((shape) => (
-              <motion.div
-                key={shape.id}
-                initial={{ scale: 0, opacity: 0, rotate: 0 }}
-                animate={{ 
-                  scale: 1, 
-                  opacity: shape.opacity, 
-                  rotate: shape.rotation,
-                  left: `${shape.x}%`,
-                  top: `${shape.y}%`
-                }}
-                exit={{ scale: 0, opacity: 0 }}
-                drag
-                dragMomentum={false}
-                className="absolute cursor-grab active:cursor-grabbing"
-                style={{
-                  width: shape.size,
-                  height: shape.size,
-                  transform: 'translate(-50%, -50%)',
-                }}
-              >
-                <ShapeRenderer type={shape.type} color={shape.color} />
-              </motion.div>
-            ))}
-          </AnimatePresence>
+        {/* Right Column: Bauhaus Engine */}
+        <div className="lg:col-span-8 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+             {/* Engine Sidebar (Nested) */}
+             <div className="md:col-span-4 space-y-6">
+                <div className="border-4 border-black p-6 bg-white hard-shadow">
+                  <h3 className="font-black uppercase tracking-widest text-xs mb-4 border-b-2 border-black pb-2">Geometric Logic</h3>
+                  <textarea
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    placeholder="e.g., 'Anxious geometric struggle'..."
+                    className="w-full h-32 p-4 border-2 border-black font-bold focus:bg-bauhaus-yellow outline-none transition-colors"
+                  />
+                  <button
+                    onClick={handleGenerate}
+                    disabled={isGenerating || !prompt.trim()}
+                    className="w-full mt-4 bg-bauhaus-black text-white py-4 font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-bauhaus-red transition-all disabled:opacity-50"
+                  >
+                    {isGenerating ? <RefreshCw className="animate-spin" /> : <Sparkles size={20} />}
+                    Compute Shapes
+                  </button>
+                </div>
 
-          {shapes.length === 0 && !isGenerating && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none opacity-20">
-              <MousePointer2 size={64} className="mb-4" />
-              <p className="text-4xl font-black uppercase tracking-tighter italic">Empty Canvas</p>
-              <p className="font-bold uppercase text-xs mt-2">Enter prompt or use controls to begin</p>
-            </div>
-          )}
+                <div className="border-4 border-black p-6 bg-white hard-shadow">
+                  <h3 className="font-black uppercase tracking-widest text-xs mb-4 border-b-2 border-black pb-2">Manual Override</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    <ToolButton onClick={() => addShape('square')} icon={<Layers />} label="Block" />
+                    <ToolButton onClick={() => addShape('circle')} icon={<RefreshCw />} label="Orbital" />
+                    <ToolButton onClick={() => addShape('triangle')} icon={<Play className="rotate-[-90deg]" />} label="Vector" />
+                    <ToolButton onClick={() => addShape('cross')} icon={<Plus />} label="Cross" />
+                  </div>
+                  <button
+                    onClick={clearCanvas}
+                    className="w-full mt-6 border-2 border-black py-2 font-black uppercase text-xs hover:bg-gray-100 flex items-center justify-center gap-2"
+                  >
+                    <Trash2 size={14} /> Reset Engine
+                  </button>
+                </div>
+             </div>
 
-          {isGenerating && (
-            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
-              <div className="w-16 h-16 border-8 border-black border-t-bauhaus-red animate-spin mb-4"></div>
-              <p className="font-black uppercase tracking-widest text-sm animate-pulse">Computing Geometric Logic...</p>
-            </div>
-          )}
+             {/* Canvas Area (Nested) */}
+             <div className="md:col-span-8 bg-bauhaus-off-white border-8 border-black relative aspect-square overflow-hidden hard-shadow-lg group" ref={canvasRef}>
+                <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(black 1px, transparent 0)', backgroundSize: '20px 20px' }}></div>
+                
+                <AnimatePresence>
+                  {shapes.map((shape) => (
+                    <motion.div
+                      key={shape.id}
+                      initial={{ scale: 0, opacity: 0, rotate: 0 }}
+                      animate={{ 
+                        scale: 1, 
+                        opacity: shape.opacity, 
+                        rotate: shape.rotation,
+                        left: `${shape.x}%`,
+                        top: `${shape.y}%`
+                      }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      drag
+                      dragMomentum={false}
+                      className="absolute cursor-grab active:cursor-grabbing"
+                      style={{
+                        width: shape.size,
+                        height: shape.size,
+                        transform: 'translate(-50%, -50%)',
+                      }}
+                    >
+                      <ShapeRenderer type={shape.type} color={shape.color} />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
 
-          {/* Export Overlay */}
-          <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
-             <button 
-                onClick={exportAsImage}
-                className="bg-black text-white p-4 border-2 border-black hover:bg-bauhaus-blue transition-all shadow-lg"
-                title="Download Composition"
-              >
-                <Download size={24} />
-             </button>
+                {shapes.length === 0 && !isGenerating && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none opacity-20">
+                    <MousePointer2 size={64} className="mb-4" />
+                    <p className="text-4xl font-black uppercase tracking-tighter italic">Neural Void</p>
+                    <p className="font-bold uppercase text-xs mt-2">Initialize logic to begin</p>
+                  </div>
+                )}
+
+                {isGenerating && (
+                  <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
+                    <div className="w-16 h-16 border-8 border-black border-t-bauhaus-red animate-spin mb-4"></div>
+                    <p className="font-black uppercase tracking-widest text-sm animate-pulse">Calculating Proportions...</p>
+                  </div>
+                )}
+
+                <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                   <button 
+                      onClick={exportAsImage}
+                      className="bg-black text-white p-4 border-2 border-black hover:bg-bauhaus-blue transition-all shadow-lg"
+                      title="Export Logical Result"
+                    >
+                      <Download size={24} />
+                   </button>
+                </div>
+             </div>
+          </div>
+
+          {/* Mini AI Tool: Text-to-Bauhaus Art */}
+          <div className="border-4 border-black p-8 bg-bauhaus-yellow hard-shadow">
+             <div className="flex items-center gap-4 mb-6">
+                <Sparkles className="text-bauhaus-red" />
+                <h2 className="text-4xl font-black uppercase tracking-tighter">AI ART FACTORY</h2>
+             </div>
+             <p className="font-bold text-sm mb-6 max-w-2xl opacity-70">
+                A specialized neural pipeline that translates emotional semantics into geometric Bauhaus syntax. 
+                Enter any abstract concept and watch the AI construct a visual representation.
+             </p>
+             <div className="flex gap-4">
+                <button 
+                  onClick={() => setPrompt('Nostalgic blue architecture')}
+                  className="px-4 py-2 bg-white border-2 border-black font-black uppercase text-[10px] hover:bg-black hover:text-white transition-all"
+                >
+                  Nostalgic Blue
+                </button>
+                <button 
+                  onClick={() => setPrompt('Angry red chaos')}
+                  className="px-4 py-2 bg-white border-2 border-black font-black uppercase text-[10px] hover:bg-black hover:text-white transition-all"
+                >
+                  Angry Red
+                </button>
+                <button 
+                  onClick={() => setPrompt('Perfect golden silence')}
+                  className="px-4 py-2 bg-white border-2 border-black font-black uppercase text-[10px] hover:bg-black hover:text-white transition-all"
+                >
+                  Golden Silence
+                </button>
+             </div>
           </div>
         </div>
       </div>

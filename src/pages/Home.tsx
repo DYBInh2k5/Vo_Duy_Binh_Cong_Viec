@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { motion, useScroll, useTransform } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 import { PROJECTS } from '../constants';
+import { useSEO } from '../hooks/useSEO';
 
 import { BauhausGraphic } from '../components/BauhausGraphic';
 import { WWELogo } from '../components/WWELogo';
@@ -10,6 +11,11 @@ import { ThreeScene } from '../components/ThreeScene';
 
 const Home = () => {
   const featuredProjects = PROJECTS.slice(0, 3);
+
+  useSEO({
+    description: 'Portfolio of Võ Duy Bình (coDY) - Software Tech Student, Content Creator, and AI Engineer specialising in Bauhaus-inspired digital experiences.',
+    keywords: ['Võ Duy Bình', 'coDY', 'Software Tech Student', 'Content Creator', 'AI Engineer', 'Bauhaus Design', 'React Portfolio']
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-8 pt-16">
@@ -127,9 +133,48 @@ const Home = () => {
           <div className="text-sm font-bold uppercase mt-base tracking-widest">Powered Creativity</div>
         </div>
       </section>
+
+      {/* Scroll-telling Bauhaus Assembly */}
+      <section className="mt-40 mb-40 relative py-40 bg-black text-white overflow-hidden border-y-8 border-bauhaus-red">
+        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
+        
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="inline-block p-4 border-4 border-white mb-8"
+          >
+            <div className="w-16 h-16 bg-bauhaus-yellow"></div>
+          </motion.div>
+          <h2 className="text-6xl md:text-8xl font-black uppercase tracking-tighter mb-8 leading-none">THE GRID AS ARCHITECTURE</h2>
+          <p className="text-xl font-bold uppercase tracking-widest opacity-60 max-w-2xl mx-auto">
+            Design is not just visual. It is a structural mandate for efficiency, logic, and human interaction.
+          </p>
+        </div>
+
+        <div className="mt-20 flex justify-center gap-20">
+          <ScrollShape color="bg-bauhaus-red" delay={0} axis="y" />
+          <ScrollShape color="bg-bauhaus-blue" delay={0.2} axis="x" />
+          <ScrollShape color="bg-bauhaus-yellow" delay={0.4} axis="y" />
+        </div>
+      </section>
     </div>
   );
 };
 
+const ScrollShape = ({ color, delay, axis }: { color: string, delay: number, axis: 'x' | 'y' }) => {
+  const { scrollYProgress } = useScroll();
+  const move = useTransform(scrollYProgress, [0.3, 0.7], [axis === 'x' ? -500 : 500, 0]);
+  const opacity = useTransform(scrollYProgress, [0.4, 0.6], [0, 1]);
+  const rotate = useTransform(scrollYProgress, [0.4, 0.6], [axis === 'x' ? -90 : 90, 0]);
+
+  return (
+    <motion.div 
+      style={{ [axis]: move, opacity, rotate }}
+      className={`w-32 h-32 border-4 border-white ${color} hard-shadow`}
+    />
+  );
+};
+
 export default Home;
-;

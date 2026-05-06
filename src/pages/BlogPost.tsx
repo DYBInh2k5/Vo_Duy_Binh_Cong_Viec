@@ -7,6 +7,7 @@ import Markdown from 'react-markdown';
 import { motion } from 'motion/react';
 import { ArrowLeft, Calendar, User, Clock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useSEO } from '../hooks/useSEO';
 
 interface BlogPost {
   title: string;
@@ -23,6 +24,23 @@ const BlogPost = () => {
   const navigate = useNavigate();
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Extract a clean description from markdown content
+  const getDescription = (content: string) => {
+    return content
+      .replace(/[#*`]/g, '') // Remove basic markdown characters
+      .split('\n')
+      .filter(line => line.trim().length > 0)
+      .join(' ')
+      .slice(0, 160) + '...';
+  };
+
+  useSEO({
+    title: post?.title,
+    description: post ? getDescription(post.content) : undefined,
+    keywords: post?.tags,
+    image: post?.image
+  });
 
   useEffect(() => {
     const fetchPost = async () => {
