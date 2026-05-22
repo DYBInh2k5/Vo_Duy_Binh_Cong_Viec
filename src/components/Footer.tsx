@@ -1,9 +1,13 @@
 import { PERSONAL_INFO } from '../constants';
+import { VDBLogo } from './VDBLogo';
 
 const Footer = () => {
   return (
     <footer className="flex flex-col md:flex-row justify-between items-center w-full px-8 py-12 gap-8 bg-white dark:bg-stone-900 border-t-4 border-black dark:border-white mt-16 font-sans uppercase text-sm font-bold">
-      <div className="text-xl font-black text-black dark:text-white">{PERSONAL_INFO.nickname}</div>
+      <div className="flex items-center gap-3">
+        <VDBLogo size="sm" />
+        <div className="text-xl font-black text-black dark:text-white">{PERSONAL_INFO.nickname}</div>
+      </div>
       <div className="text-black dark:text-white">© 2024 {PERSONAL_INFO.nickname}. FORM FOLLOWS FUNCTION.</div>
       <div className="flex gap-4">
         <a 

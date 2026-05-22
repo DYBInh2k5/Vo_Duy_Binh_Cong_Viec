@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Menu, X, Languages, DraftingCompass, Palette } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
+import { VDBLogo } from './VDBLogo';
 
 const Navbar = () => {
   const { t, i18n } = useTranslation();
@@ -46,8 +47,9 @@ const Navbar = () => {
 
   return (
     <nav className="flex justify-between items-center w-full px-8 h-20 bg-white dark:bg-stone-900 border-b-4 border-black dark:border-white hard-shadow sticky top-0 z-50">
-      <Link to="/" className="text-3xl font-black text-black dark:text-white uppercase tracking-tighter">
-        coDY
+      <Link to="/" className="flex items-center gap-3 text-3xl font-black text-black dark:text-white uppercase tracking-tighter group">
+        <VDBLogo size="sm" />
+        <span className="group-hover:text-bauhaus-red transition-colors duration-200">coDY</span>
       </Link>
 
       {/* Desktop Links */}

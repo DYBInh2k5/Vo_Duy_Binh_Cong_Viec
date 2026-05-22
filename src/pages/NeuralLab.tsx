@@ -5,6 +5,7 @@ import {
   Sparkles, RefreshCw, Radio, FileCode, CheckCircle, ExternalLink,
   LogIn, LogOut, Palette, Play, Database, Lock, UserCheck, Server
 } from 'lucide-react';
+import { VDBLogo } from '../components/VDBLogo';
 import { db, auth, loginWithGoogle, logout } from '../lib/firebase';
 import { collection, doc, setDoc, getDocs, query, orderBy, limit, serverTimestamp } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from '../lib/firestoreUtils';
@@ -474,7 +475,7 @@ const NeuralLab = () => {
       <header className="mb-12 border-b-8 border-black pb-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-bauhaus-blue border-4 border-black shrink-0"></div>
+            <VDBLogo size="md" className="shrink-0" />
             <div>
               <h1 className="text-5xl sm:text-7xl font-black uppercase tracking-tighter">
                 NEURAL <span className="text-bauhaus-red">LAB</span>

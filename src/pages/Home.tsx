@@ -8,6 +8,7 @@ import { useSEO } from '../hooks/useSEO';
 import { BauhausGraphic } from '../components/BauhausGraphic';
 import { WWELogo } from '../components/WWELogo';
 import { ThreeScene } from '../components/ThreeScene';
+import { VDBLogo } from '../components/VDBLogo';
 
 const Home = () => {
   const featuredProjects = PROJECTS.slice(0, 3);
@@ -27,10 +28,13 @@ const Home = () => {
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[120px] leading-[0.9] font-black text-bauhaus-black uppercase tracking-[-0.04em]">
-              VÕ DUY BÌNH <br />
-              <span className="text-bauhaus-red">(coDY)</span>
-            </h1>
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-6 lg:gap-8 mb-6">
+              <VDBLogo size="xl" className="shrink-0 hover:rotate-6 transition-transform duration-300" />
+              <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[100px] xl:text-[110px] leading-[0.9] font-black text-bauhaus-black dark:text-white uppercase tracking-[-0.04em] text-center md:text-left">
+                VÕ DUY BÌNH <br />
+                <span className="text-bauhaus-red">(coDY)</span>
+              </h1>
+            </div>
             <p className="text-xl sm:text-2xl md:text-[32px] font-bold text-bauhaus-blue uppercase mt-base tracking-tight">
               Software Tech Student | Content Creator | AI Engineer
             </p>
@@ -140,12 +144,13 @@ const Home = () => {
         
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            whileInView={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, scale: 0.5, rotate: -30 }}
+            whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
             viewport={{ once: true }}
-            className="inline-block p-4 border-4 border-white mb-8"
+            transition={{ type: "spring", stiffness: 100 }}
+            className="inline-block mb-8"
           >
-            <div className="w-16 h-16 bg-bauhaus-yellow"></div>
+            <VDBLogo size="lg" className="!border-white !bg-stone-900 border-4 border-white shadow-[6px_6px_0px_0px_white]" />
           </motion.div>
           <h2 className="text-6xl md:text-8xl font-black uppercase tracking-tighter mb-8 leading-none">THE GRID AS ARCHITECTURE</h2>
           <p className="text-xl font-bold uppercase tracking-widest opacity-60 max-w-2xl mx-auto">
