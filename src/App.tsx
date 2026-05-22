@@ -24,6 +24,7 @@ const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Guestbook = React.lazy(() => import('./pages/Guestbook'));
 const Rubik = React.lazy(() => import('./pages/Rubik'));
 const ProjectDetail = React.lazy(() => import('./pages/ProjectDetail'));
+const NeuralLab = React.lazy(() => import('./pages/NeuralLab'));
 const AIAssistant = React.lazy(() => import('./components/AIAssistant'));
 
 function App() {
@@ -68,6 +69,7 @@ function App() {
               <Route path="/blog/:id" element={<BlogPost />} />
               <Route path="/guestbook" element={<Guestbook />} />
               <Route path="/rubik" element={<Rubik />} />
+              <Route path="/neurallab" element={<NeuralLab />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/dashboard" element={<Dashboard />} />
             </Routes>

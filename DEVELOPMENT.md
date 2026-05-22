@@ -2,6 +2,15 @@
 
 This document tracks the evolution of the coDY Portfolio project from its initial generation to its current state.
 
+## 2026-05-06: Version 2.1.0 (Internationalization & UI Refinement)
+### Updates
+- **Internationalization (i18n):** Integrated `react-i18next` for bilingual support (English/Vietnamese). Migrated hardcoded strings to translation files.
+- **UI Refinement:**
+    - Refactored Hero headers across all pages for better legibility and responsive scaling.
+    - Removed legacy "INFRASTRUCTURE" background text overlay to reduce visual noise.
+    - Optimized Bauhaus grid layouts and shadow effects.
+- **Maintenance:** Updated all project documentation to reflect the current state of the application.
+
 ## 2026-05-04: Version 2.0.0 (Full-Stack & Firebase)
 ### Major Transitions
 - **Full-Stack Architecture:** Migrated from SPA to a hybrid Express + Vite server. This enables secure backend operations like SMTP email handling via Nodemailer.

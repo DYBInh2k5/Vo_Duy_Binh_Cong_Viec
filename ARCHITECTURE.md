@@ -11,6 +11,7 @@ This document outlines the technical architecture and organization of the coDY P
 - **Styling:** Tailwind CSS (Modern Bauhaus Aesthetic)
 - **Animations:** Framer Motion (`motion/react`)
 - **Backend Services:** Firebase (FireStore, Auth, Storage, Remote Config, Cloud Functions, Messaging)
+- **Internationalization:** i18next (`react-i18next`)
 - **Email:** Nodemailer (SMTP/Gmail)
 
 ## Project Structure
@@ -58,7 +59,12 @@ The application uses an Express server to handle backend logic (like sending sec
 - **Strict Color Palette:** `bauhaus-red`, `bauhaus-yellow`, `bauhaus-blue`, and `bauhaus-black`.
 - **High Contrast:** Heavy use of black borders and shadows.
 
-### 4. Motion System
+### 4. Internationalization (i18n)
+- **Bilingual Core:** Support for English (`en`) and Vietnamese (`vi`) using `i18next`.
+- **Dynamic Translation:** Language switching without page reload, persisting user preference.
+- **Centralized Locales:** Translations stored in `/public/locales/` (standard) or `src/locales/` (optimized).
+
+### 5. Motion System
 Using Framer Motion for page transitions and micro-interactions.
 
 ## Data Flow

@@ -65,7 +65,33 @@ service cloud.firestore {
              data.timestamp is timestamp;
     }
 
+    function isValidCVGeneration(data) {
+      return data.keys().hasAll(['focus', 'themeTitle', 'philosophyStatement', 'timestamp']) &&
+             data.focus is string && data.focus.size() <= 1000 &&
+             data.themeTitle is string && data.themeTitle.size() <= 300 &&
+             data.philosophyStatement is string && data.philosophyStatement.size() <= 2000 &&
+             data.timestamp is timestamp;
+    }
+
+    function isValidLabQuery(data) {
+      return data.keys().hasAll(['type', 'query', 'response', 'timestamp']) &&
+             data.type is string && data.type.size() <= 100 &&
+             data.query is string && data.query.size() <= 2000 &&
+             data.response is string && data.response.size() <= 20000 &&
+             data.timestamp is timestamp;
+    }
+
     // --- Collections ---
+
+    match /cv_generations/{id} {
+      allow create: if isValidId(id) && isValidCVGeneration(incoming());
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /lab_queries/{id} {
+      allow create: if isValidId(id) && isValidLabQuery(incoming());
+      allow read, update, delete: if isAdmin();
+    }
 
     match /admins/{uid} {
       allow read: if isSignedIn();

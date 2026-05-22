@@ -71,9 +71,41 @@
         "timestamp": { "type": "string", "format": "date-time" }
       },
       "required": ["userId", "userName", "message", "timestamp"]
+    },
+    "CVGeneration": {
+      "title": "CV Generation",
+      "description": "Bespoke CV configurations synced for recruiter insights",
+      "type": "object",
+      "properties": {
+        "focus": { "type": "string" },
+        "themeTitle": { "type": "string" },
+        "philosophyStatement": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["focus", "themeTitle", "philosophyStatement", "timestamp"]
+    },
+    "LabQuery": {
+      "title": "Lab Query",
+      "description": "Database queries and interactions stored dynamically",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "query": { "type": "string" },
+        "response": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["type", "query", "response", "timestamp"]
     }
   },
   "firestore": {
+    "/cv_generations/{id}": {
+      "schema": "CVGeneration",
+      "description": "Logs of generated custom resumes"
+    },
+    "/lab_queries/{id}": {
+      "schema": "LabQuery",
+      "description": "Inquiries processed on grounding and caching nodes"
+    },
     "/projects/{projectId}": {
       "schema": "Project",
       "description": "Collection of portfolio projects"

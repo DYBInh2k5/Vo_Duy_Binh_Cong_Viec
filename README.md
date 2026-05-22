@@ -23,7 +23,8 @@ This application is strictly built on Bauhaus principles:
 - **Security**: [Firebase App Check](https://firebase.google.com/docs/app-check) (reCAPTCHA v3)
 - **Communication**: [Firebase Messaging (FCM)](https://firebase.google.com/docs/cloud-messaging)
 - **Mailing**: [Nodemailer](https://nodemailer.com/) (SMTP via Gmail)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/) (Brutalist Bauhaus pattern)
+- **Styles**: [Tailwind CSS](https://tailwindcss.com/) (Brutalist Bauhaus pattern)
+- **i18n**: [i18next](https://www.i18next.com/) (Multi-language support)
 - **Animations**: [Framer Motion](https://www.framer.com/motion/)
 
 ---
@@ -54,6 +55,7 @@ Xem hướng dẫn chi tiết tại [ANTIGRAVITY_LOCAL_GUIDE.md](./ANTIGRAVITY_L
 
 ## 📁 Project Structure
 - `/src/pages`: Individual structural modules (Home, Projects, Experience, About, Contact).
+- `/src/locales`: Localization dictionaries for i18n.
 - `/src/components`: Global architectural elements (Navbar, Footer).
 - `/src/constants.ts`: The central data registry for all personal information, projects, and skills.
 - `/src/index.css`: Global design system and Bauhaus variables.
