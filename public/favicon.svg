@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Solid backing to make it stand out on any theme -->
+  <rect width="200" height="200" rx="40" fill="#FFFFFF" />
+  <rect width="192" height="192" x="4" y="4" rx="36" fill="#FFFFFF" stroke="#000000" stroke-width="8" />
+
+  <!-- Bauhaus Rigid Yellow Block -->
+  <rect x="15" y="15" width="75" height="170" fill="#FFFF00" stroke="#000000" stroke-width="6" />
+
+  <!-- Bauhaus Rigid Blue Block -->
+  <rect x="90" y="110" width="95" height="75" fill="#0000FF" stroke="#000000" stroke-width="6" />
+
+  <!-- Bauhaus Rigid Red Circle -->
+  <circle cx="140" cy="60" r="45" fill="#FF0000" stroke="#000000" stroke-width="6" />
+
+  <!-- Letter 'V' monogram stroke -->
+  <path d="M 25 35 L 50 165 L 75 35" stroke="#000000" stroke-width="12" stroke-linecap="square" stroke-linejoin="miter" />
+
+  <!-- Letter 'D' monogram stroke -->
+  <path d="M 115 35 L 115 85 C 145 85 145 35 115 35 Z" stroke="#FFFFFF" stroke-width="10" stroke-linecap="square" stroke-linejoin="miter" />
+
+  <!-- Letter 'B' monogram stroke -->
+  <path d="M 110 120 L 110 175 M 110 120 C 135 120 135 145 110 145 C 135 145 135 175 110 175" stroke="#FFFFFF" stroke-width="9" stroke-linecap="square" stroke-linejoin="miter" />
+
+  <!-- Core Architectural Accent centerpoint -->
+  <line x1="10" y1="100" x2="190" y2="100" stroke="#000000" stroke-width="4" stroke-dasharray="4 8" />
+  <circle cx="100" cy="100" r="10" fill="#000000" />
+</svg>
