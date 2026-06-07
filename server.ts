@@ -340,6 +340,128 @@ async function startServer() {
     }
   });
 
+  // NODE 13: Localized Neural i18n Compiler & Translation Refiner
+  app.post("/api/gemini/i18n-compile", async (req, res) => {
+    const { sourceText, context } = req.body;
+    try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) throw new Error("GEMINI_API_KEY is not configured.");
+
+      const { GoogleGenAI, Type } = await import("@google/genai");
+      const ai = new GoogleGenAI({ apiKey });
+
+      const prompt = `You are a professional Bauhaus-oriented translation refiner and JSON schema compiler.
+      Deconstruct, translate, and reformat the input text between English and Vietnamese.
+      Input Text: "${sourceText}"
+      Context / Domain: "${context || 'Core engineering, creative automation'}"
+
+      Convert the translation into a structured i18n format with a suitable short prefix key (lowercase camelCase like 'neuralTranslate', 'terminalLogs').
+      Provide localized objects representing:
+      - title: brief high-impact title (all capitalized)
+      - subtitle: complementary subtitle
+      - description: comprehensive explanation or instruction
+      - action: localized action text (short verb, capitalized)
+
+      Return ONLY a valid JSON object matching the requested schema. No markdown wraps or text outside the JSON.`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              prefixKey: { type: Type.STRING },
+              en: {
+                type: Type.OBJECT,
+                properties: {
+                  title: { type: Type.STRING },
+                  subtitle: { type: Type.STRING },
+                  description: { type: Type.STRING },
+                  action: { type: Type.STRING }
+                },
+                required: ["title", "subtitle", "description", "action"]
+              },
+              vi: {
+                type: Type.OBJECT,
+                properties: {
+                  title: { type: Type.STRING },
+                  subtitle: { type: Type.STRING },
+                  description: { type: Type.STRING },
+                  action: { type: Type.STRING }
+                },
+                required: ["title", "subtitle", "description", "action"]
+              },
+              explanation: { type: Type.STRING }
+            },
+            required: ["prefixKey", "en", "vi", "explanation"]
+          }
+        }
+      });
+
+      const text = response.text || "{}";
+      res.json(JSON.parse(text));
+    } catch (err: any) {
+      console.error("I18n Compile Error:", err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // NODE 14: Neural Code Deconstruct & Refactor Engine
+  app.post("/api/gemini/code-deconstruct", async (req, res) => {
+    const { rawCode, language } = req.body;
+    try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) throw new Error("GEMINI_API_KEY is not configured.");
+
+      const { GoogleGenAI, Type } = await import("@google/genai");
+      const ai = new GoogleGenAI({ apiKey });
+
+      const prompt = `You are an expert Bauhaus Brutalist code auditor and zero-fluff software optimization engine.
+      Analyze the given code block, strip out any "fluff", redundant variables, nested styling boilerplate, or unoptimal logic structures, and output a highly clean module.
+      
+      Input Target Language Context: "${language || 'TypeScript/JavaScript'}"
+      Original Raw Code Block to Optimize:
+      \`\`\`
+      ${rawCode}
+      \`\`\`
+
+      Improve the code by enforcing pure functional structure, absolute clarity, and maximum performance.
+      Generate a structured response explaining:
+      - optimalCode: The optimized, refined, elegant final code without comments.
+      - bloatIdentified: High-impact analysis of what was redundant or wasteful.
+      - performanceGains: Quantifiable estimation of performance, complexity, or readability improvement.
+      - bauhausRuleAxiom: A Bauhaus design principle (e.g. "Form follows function", "Less is more", "Grid Integrity") applied to this optimization work.
+
+      Return ONLY a valid JSON object matching the requested schema. No markdown wraps or text outside the JSON.`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              optimalCode: { type: Type.STRING },
+              bloatIdentified: { type: Type.STRING },
+              performanceGains: { type: Type.STRING },
+              bauhausRuleAxiom: { type: Type.STRING }
+            },
+            required: ["optimalCode", "bloatIdentified", "performanceGains", "bauhausRuleAxiom"]
+          }
+        }
+      });
+
+      const text = response.text || "{}";
+      res.json(JSON.parse(text));
+    } catch (err: any) {
+      console.error("Code deconstruct error:", err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // Create combined HTTP / WebSocket Server
   const server = http.createServer(app);
   const wss = new WebSocketServer({ server, path: "/live" });

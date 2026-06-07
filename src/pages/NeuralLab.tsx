@@ -9,6 +9,8 @@ import { VDBLogo } from '../components/VDBLogo';
 import { db, auth, loginWithGoogle, logout } from '../lib/firebase';
 import { collection, doc, setDoc, getDocs, query, orderBy, limit, serverTimestamp } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from '../lib/firestoreUtils';
+import NeuralTranslationCompiler from '../components/NeuralTranslationCompiler';
+import NeuralCodeDeconstructor from '../components/NeuralCodeDeconstructor';
 
 interface GroundingSource {
   title: string;
@@ -61,16 +63,105 @@ const NeuralLab = () => {
 
   // --- NODE 9: AI WORKSPACE BLUEPRINT STATES ---
   const [activeBlueprintInput, setActiveBlueprintInput] = useState('Build Portfolio Landing Page');
+  const [customBlueprintInput, setCustomBlueprintInput] = useState('');
   const [activeWorkflowStep, setActiveWorkflowStep] = useState(0); 
   const [workflowSimulationState, setWorkflowSimulationState] = useState<'IDLE' | 'RUNNING' | 'COMPLETED'>('IDLE');
   const [blueprintLogs, setBlueprintLogs] = useState<string[]>(['[BLUEPRINT SYSTEM]: Ready for task initialization.']);
   
-  // --- NODE 10: PROMPT VAULT STATES ---
+  // --- NODE 10: PROMPT VAULT & SHAPER STATES ---
   const [copiedPromptId, setCopiedPromptId] = useState<string | null>(null);
+  const [builderPersona, setBuilderPersona] = useState<string>('Software Architect');
+  const [builderConstraint, setBuilderConstraint] = useState<string>('Strict Bauhaus Brutalism');
+  const [builderSubject, setBuilderSubject] = useState<string>('Secure API Route with rate limiting');
+  const [builtPromptResult, setBuiltPromptResult] = useState<string>('');
+
+  // --- NODE 11: AI EFFICIENCY METRICS STATES ---
+  const [metricProjectScale, setMetricProjectScale] = useState<'PROTOTYPE' | 'WEB_APP' | 'ENTERPRISE'>('WEB_APP');
 
   // --- NODE 12: AI SYSTEM LOG STATES ---
   const [selectedLogCategory, setSelectedLogCategory] = useState<'ALL' | 'PROTO' | 'TREND'>('ALL');
   const [logSearchQuery, setLogSearchQuery] = useState('');
+  const [newLogTitle, setNewLogTitle] = useState('');
+  const [newLogDesc, setNewLogDesc] = useState('');
+  const [newLogCategory, setNewLogCategory] = useState<'PROTO' | 'TREND'>('PROTO');
+  const [firestoreSystemLogs, setFirestoreSystemLogs] = useState<any[]>([]);
+  const [firestoreBlueprints, setFirestoreBlueprints] = useState<any[]>([]);
+  const [localSystemLogs, setLocalSystemLogs] = useState<any[]>([
+    {
+      id: 'PROTO_NOTE_820',
+      category: 'PROTO',
+      date: '2026-06-03',
+      title: 'Gemini 1.5 Context Caching cost optimization strategy',
+      desc: 'By taking advantage of context caching inside client-specific API pipelines, we observed an average of 80% cost reduction. Initializing pre-loaded system rules, Bauhaus layouts, and i18n locales inside the cache optimizes context load latency down to sub-1.2s.'
+    },
+    {
+      id: 'PROTO_NOTE_811',
+      category: 'TREND',
+      date: '2026-05-28',
+      title: 'The paradigm shift from Chat interfaces to Autonomous Process Graphs',
+      desc: 'Static conversation layers are highly inefficient. The future belongs to interconnected directed acyclic graph (DAG) pipelines, where individual micro-agent modules trigger based on task telemetry. True utility comes from structured code compilers that lint and validate outputs autonomously.'
+    },
+    {
+      id: 'PROTO_NOTE_799',
+      category: 'PROTO',
+      date: '2026-05-15',
+      title: 'Applying Bauhaus constraints to automatic SVG layout generators',
+      desc: 'Mathematical shape generation is far superior to pre-designed SVGs. Feeding rigid coordinates, limited CSS grid bounds, and precise Bauhaus palette parameters ensures absolute design alignment, avoiding typical AI graphic bloat or over-decoration.'
+    }
+  ]);
+
+  const fetchSystemLogs = async () => {
+    try {
+      const snap = await getDocs(query(collection(db, 'system_logs'), orderBy('timestamp', 'desc')));
+      const logs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      setFirestoreSystemLogs(logs);
+    } catch (err: any) {
+      console.warn("Failed to fetch system logs:", err.message);
+    }
+  };
+
+  const fetchBlueprints = async () => {
+    try {
+      const snap = await getDocs(query(collection(db, 'workspace_blueprints'), orderBy('timestamp', 'desc')));
+      const bprints = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      setFirestoreBlueprints(bprints);
+    } catch (err: any) {
+      console.warn("Failed to fetch blueprints:", err.message);
+    }
+  };
+
+  const handleComposePrompt = () => {
+    const formattedPrompt = `System Persona Override:\n- Role: ${builderPersona}\n- Strict Regulatory Guideline: ${builderConstraint}\n- Primary Objective: Deconstruct and execute the core specification: "${builderSubject}"\n- Quality Invariant: Validate strict type safety, zero dependencies. Output fully finished modules.`;
+    setBuiltPromptResult(formattedPrompt);
+  };
+
+  const handleCreateSystemLog = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newLogTitle || !newLogDesc) return;
+
+    if (!authUser) {
+      alert("PLEASE INITIALIZE PROTOCOL IDENTITY (SIGN IN WITH GOOGLE IN NODE 08) FIRST TO POST HARDENED SYSTEM LOGS.");
+      return;
+    }
+
+    const newId = `PROTO_LOG_${Date.now()}`;
+    const newEntry = {
+      category: newLogCategory,
+      title: newLogTitle,
+      desc: newLogDesc,
+      date: new Date().toISOString().split('T')[0],
+      timestamp: new Date()
+    };
+
+    try {
+      await setDoc(doc(db, 'system_logs', newId), newEntry);
+      setNewLogTitle('');
+      setNewLogDesc('');
+      fetchSystemLogs();
+    } catch (err: any) {
+      handleFirestoreError(err, OperationType.WRITE, `system_logs/${newId}`);
+    }
+  };
 
   const runWorkflowSimulation = () => {
     if (workflowSimulationState === 'RUNNING') return;
@@ -503,6 +594,10 @@ const NeuralLab = () => {
   };
 
   useEffect(() => {
+    // Fetch logs and blueprints for all visitors (public read)
+    fetchSystemLogs();
+    fetchBlueprints();
+
     const unsub = auth.onAuthStateChanged((user) => {
       setAuthUser(user);
       if (user) {
@@ -529,7 +624,7 @@ const NeuralLab = () => {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            {[1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12].map((num) => (
+            {[1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14].map((num) => (
               <button
                 key={num}
                 onClick={() => setActiveNode(num)}
@@ -566,7 +661,9 @@ const NeuralLab = () => {
                 { id: 9, tag: 'NODE 09', title: 'Workspace Blueprint', color: 'bg-bauhaus-red text-white', desc: 'Interactive interconnected agent automation workflow visualization' },
                 { id: 10, tag: 'NODE 10', title: 'Prompt Crafting Vault', color: 'bg-bauhaus-blue text-white', desc: 'Production-ready prompt engineering assets with quick copy functionality' },
                 { id: 11, tag: 'NODE 11', title: 'Efficiency Metrics', color: 'bg-bauhaus-yellow text-black', desc: 'Granular comparison charts of traditional vs AI-optimized pipelines' },
-                { id: 12, tag: 'NODE 12', title: 'AI System Log', color: 'bg-black text-white', desc: 'Short-form protocol notes tracking model trends and system telemetry' }
+                { id: 12, tag: 'NODE 12', title: 'AI System Log', color: 'bg-black text-white', desc: 'Short-form protocol notes tracking model trends and system telemetry' },
+                { id: 13, tag: 'NODE 13', title: 'Locales Compiler', color: 'bg-bauhaus-blue text-white', desc: 'Free high-fidelity Gemini translation compiling dynamic EN/VI i18next structures' },
+                { id: 14, tag: 'NODE 14', title: 'Refactor Tunnel', color: 'bg-bauhaus-red text-white', desc: 'Sparsity optimizer stripping loose boilerplate or redundant calculations' }
               ].map((node) => (
                 <button
                   key={node.id}
@@ -1408,7 +1505,12 @@ const NeuralLab = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {['Build Portfolio Landing Page', 'Debug Relational SQL Schema', 'Draft Optimized Social Video Script'].map((inputTask) => (
+                  {Array.from(new Set([
+                    'Build Portfolio Landing Page', 
+                    'Debug Relational SQL Schema', 
+                    'Draft Optimized Social Video Script',
+                    ...firestoreBlueprints.map((b) => b.task)
+                  ])).slice(0, 9).map((inputTask) => (
                     <button
                       key={inputTask}
                       onClick={() => {
@@ -1429,6 +1531,45 @@ const NeuralLab = () => {
                       {inputTask}
                     </button>
                   ))}
+                </div>
+
+                {/* Custom Task Injection Node */}
+                <div className="border-4 border-black p-4 bg-stone-100 flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="text"
+                    placeholder="ENTER A CUSTOM TASK TO AUTOMATE (E.G. ASSEMBLE SYSTEM BLOG API)..."
+                    value={customBlueprintInput}
+                    onChange={(e) => setCustomBlueprintInput(e.target.value)}
+                    disabled={workflowSimulationState === 'RUNNING'}
+                    className="border-2 border-black p-2.5 font-mono font-bold text-xs uppercase flex-1 outline-none bg-white focus:bg-bauhaus-yellow text-black"
+                  />
+                  <button
+                    onClick={async () => {
+                      if (customBlueprintInput.trim()) {
+                        const taskText = customBlueprintInput.trim();
+                        if (authUser) {
+                          const newBlueprintId = `BPRINT_${Date.now()}`;
+                          try {
+                            await setDoc(doc(db, 'workspace_blueprints', newBlueprintId), {
+                              task: taskText,
+                              timestamp: new Date()
+                            });
+                            fetchBlueprints();
+                          } catch (err: any) {
+                            console.error("Firestore save task error:", err);
+                          }
+                        }
+                        setActiveBlueprintInput(taskText);
+                        setActiveWorkflowStep(0);
+                        setBlueprintLogs([`[BLUEPRINT SYSTEM]: Injected custom blueprint task "${taskText}". Ready to run pipeline.`]);
+                        setCustomBlueprintInput('');
+                      }
+                    }}
+                    disabled={workflowSimulationState === 'RUNNING' || !customBlueprintInput.trim()}
+                    className="bg-black text-white px-5 py-2.5 font-black text-xs uppercase border-2 border-black hover:bg-bauhaus-red hover:text-white transition-colors disabled:opacity-50 hover:translate-x-[-1px] hover:translate-y-[-1px] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-x-0 active:translate-y-0 active:shadow-none"
+                  >
+                    INJECT CUSTOM SPEC
+                  </button>
                 </div>
 
                 {/* Sơ đồ liên kết (The Graph Grid) */}
@@ -1525,6 +1666,85 @@ const NeuralLab = () => {
                   <Terminal size={32} className="text-bauhaus-blue" />
                 </div>
 
+                {/* Prompt Shaper Playground */}
+                <div className="border-4 border-black p-6 bg-stone-50 space-y-4 text-left">
+                  <div className="border-b-4 border-black pb-2 flex justify-between items-center bg-black text-white px-3 py-1.5">
+                    <span className="font-mono text-xs font-black">PROMPT SHAPER ENGINE (ACTIVE)</span>
+                    <span className="text-[9px] font-mono select-none uppercase">DYNAMIC COMPILER</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black uppercase text-stone-600 block leading-tight">SYSTEM ROLE / PERSONA:</label>
+                      <select
+                        value={builderPersona}
+                        onChange={(e) => setBuilderPersona(e.target.value)}
+                        className="w-full border-2 border-black p-2 font-mono text-xs font-bold uppercase outline-none bg-white focus:bg-bauhaus-yellow text-black"
+                      >
+                        <option value="Software Architect">SOFTWARE ARCHITECT</option>
+                        <option value="UI Design System Specialist">UI DESIGN SYSTEM SPECIALIST</option>
+                        <option value="SQL Database Optimizer">SQL DATABASE OPTIMIZER</option>
+                        <option value="AI Orchestration Agent">AI ORCHESTRATION AGENT</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black uppercase text-stone-600 block leading-tight">CREATIVE CONSTRAINT LEVEL:</label>
+                      <select
+                        value={builderConstraint}
+                        onChange={(e) => setBuilderConstraint(e.target.value)}
+                        className="w-full border-2 border-black p-2 font-mono text-xs font-bold uppercase outline-none bg-white focus:bg-bauhaus-yellow text-black"
+                      >
+                        <option value="Strict Bauhaus Brutalism">STRICT BAUHAUS BRUTALISM</option>
+                        <option value="RFC JSON Schema Enforcement">RFC JSON SCHEMA ENFORCING</option>
+                        <option value="Max Code Compression & Speed">MAX CODE COMPRESSION</option>
+                        <option value="Zero Dependency Clean TypeScript">ZERO DEPENDENCY CLEAN TS</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black uppercase text-stone-600 block leading-tight">CORE TARGET SUBJECT:</label>
+                      <input
+                        type="text"
+                        value={builderSubject}
+                        onChange={(e) => setBuilderSubject(e.target.value)}
+                        placeholder="E.G. SECURE API ROUTE WITH RATE LIMITING..."
+                        className="w-full border-2 border-black p-2 font-mono text-xs font-semibold uppercase outline-none bg-white focus:bg-bauhaus-yellow text-black"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleComposePrompt}
+                    className="w-full bg-bauhaus-blue text-white font-black uppercase text-xs tracking-wider border-4 border-black p-3 hover:bg-black transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] active:translate-x-0 active:translate-y-0 active:shadow-none"
+                  >
+                    GENERATE CUSTOM AGENT SPECIFICATION
+                  </button>
+
+                  {builtPromptResult && (
+                    <div className="border-4 border-black p-4 bg-white space-y-2">
+                      <div className="flex justify-between items-center border-b-2 border-stone-200 pb-1.5">
+                        <span className="text-[9px] font-mono uppercase text-stone-500 font-extrabold">COMPILED PROMPT PAYLOAD</span>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(builtPromptResult);
+                            setCopiedPromptId('custom_result_id');
+                            setTimeout(() => setCopiedPromptId(null), 2000);
+                          }}
+                          className={`text-[9px] font-mono px-2 py-1 border-2 border-black uppercase font-black transition-all ${
+                            copiedPromptId === 'custom_result_id' ? 'bg-green-500 text-white border-green-600' : 'bg-stone-100 hover:bg-black hover:text-white'
+                          }`}
+                        >
+                          {copiedPromptId === 'custom_result_id' ? 'COPIED' : 'COPY SHAPED ASSET'}
+                        </button>
+                      </div>
+                      <pre className="font-mono text-xs text-stone-800 bg-stone-50 p-3 overflow-x-auto whitespace-pre-wrap select-all max-h-48 custom-scrollbar">
+                        {builtPromptResult}
+                      </pre>
+                    </div>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-1 gap-6">
                   {[
                     {
@@ -1579,96 +1799,166 @@ const NeuralLab = () => {
             )}
 
             {/* --- NODE 11: AI EFFICIENCY METRICS --- */}
-            {activeNode === 11 && (
-              <motion.div
-                key="node-11"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="bg-white border-8 border-black p-8 hard-shadow-lg space-y-6 lg:col-span-8 w-full"
-              >
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b-4 border-black pb-4 text-left">
-                  <div>
-                    <span className="text-xs font-black bg-bauhaus-yellow text-black px-3 py-1 uppercase tracking-widest">NODE 11 // TELEMETRY</span>
-                    <h2 className="text-4xl font-extrabold uppercase tracking-tighter mt-2">AI EFFICIENCY METRICS</h2>
-                    <p className="text-xs font-bold text-stone-600 uppercase tracking-wider mt-1">Audit comparison demonstrating the productivity impact of total AI workspace integration</p>
-                  </div>
-                  <Sparkles size={32} className="text-bauhaus-yellow hidden sm:block" />
-                </div>
+            {activeNode === 11 && (() => {
+              const getMetricsData = () => {
+                switch (metricProjectScale) {
+                  case 'PROTOTYPE':
+                    return {
+                      metrics: [
+                        { label: "Software Feature Delivery Rate", tradVal: 15, aiVal: 95, color: "bg-bauhaus-red", indicator: "6.3x Performance Multiplier" },
+                        { label: "Deployment Cycle Window", tradVal: 90, aiVal: 5, color: "bg-bauhaus-blue", indicator: "94% Speed Recovery" },
+                        { label: "Specification Precision", tradVal: 65, aiVal: 99, color: "bg-bauhaus-yellow text-black animate-pulse", indicator: "Zero Invariant Failures" },
+                        { label: "Parallel Workflow Concurrency", tradVal: 8, aiVal: 98, color: "bg-black text-white", indicator: "12x Agent Nodes Running" }
+                      ],
+                      projHoursTrad: "40 PM-Hrs",
+                      projHoursAI: "3 PM-Hrs",
+                      savingPercent: "92.5%",
+                      costTrad: "$1,200",
+                      costAI: "$100"
+                    };
+                  case 'ENTERPRISE':
+                    return {
+                      metrics: [
+                        { label: "Software Feature Delivery Rate", tradVal: 6, aiVal: 99, color: "bg-bauhaus-red", indicator: "16.5x Performance Multiplier" },
+                        { label: "Deployment Cycle Window", tradVal: 99, aiVal: 12, color: "bg-bauhaus-blue", indicator: "87% Speed Recovery" },
+                        { label: "Specification Precision", tradVal: 45, aiVal: 99, color: "bg-bauhaus-yellow text-black animate-pulse", indicator: "Strict Compliance Proofs" },
+                        { label: "Parallel Workflow Concurrency", tradVal: 2, aiVal: 99, color: "bg-black text-white", indicator: "49x Massive Agent Grid" }
+                      ],
+                      projHoursTrad: "1200 PM-Hrs",
+                      projHoursAI: "85 PM-Hrs",
+                      savingPercent: "92.9%",
+                      costTrad: "$85,000",
+                      costAI: "$5,800"
+                    };
+                  case 'WEB_APP':
+                  default:
+                    return {
+                      metrics: [
+                        { label: "Software Feature Delivery Rate", tradVal: 12, aiVal: 96, color: "bg-bauhaus-red", indicator: "8.0x Performance Multiplier" },
+                        { label: "Deployment Cycle Window", tradVal: 95, aiVal: 8, color: "bg-bauhaus-blue", indicator: "91% Speed Recovery" },
+                        { label: "Specification Precision", tradVal: 58, aiVal: 99, color: "bg-bauhaus-yellow text-black animate-pulse", indicator: "Zero Invariant Failures" },
+                        { label: "Parallel Workflow Concurrency", tradVal: 5, aiVal: 99, color: "bg-black text-white", indicator: "20x Parallel Containers" }
+                      ],
+                      projHoursTrad: "240 PM-Hrs",
+                      projHoursAI: "18 PM-Hrs",
+                      savingPercent: "92.5%",
+                      costTrad: "$15,000",
+                      costAI: "$1,100"
+                    };
+                }
+              };
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 text-left">
-                  {/* Left Column: Visual progress charts */}
-                  <div className="space-y-6">
-                    <h3 className="font-black text-xl uppercase tracking-tighter border-b-2 border-black pb-2">PRODUCTIVITY INTENSITY BAR</h3>
-                    
+              const dynamicScale = getMetricsData();
+
+              return (
+                <motion.div
+                  key="node-11"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="bg-white border-8 border-black p-8 hard-shadow-lg space-y-6 lg:col-span-8 w-full"
+                >
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b-4 border-black pb-4 text-left">
+                    <div>
+                      <span className="text-xs font-black bg-bauhaus-yellow text-black px-3 py-1 uppercase tracking-widest">NODE 11 // TELEMETRY</span>
+                      <h2 className="text-4xl font-extrabold uppercase tracking-tighter mt-2">AI EFFICIENCY METRICS</h2>
+                      <p className="text-xs font-bold text-stone-600 uppercase tracking-wider mt-1">Audit comparison demonstrating the productivity impact of total AI workspace integration</p>
+                    </div>
+                    <Sparkles size={32} className="text-bauhaus-yellow hidden sm:block" />
+                  </div>
+
+                  {/* Dynamic Project Scale Switcher */}
+                  <div className="flex flex-col sm:flex-row border-4 border-black bg-stone-100 p-1.5 gap-2">
                     {[
-                      { label: "Software Feature Delivery Rate", tradVal: 15, aiVal: 95, color: "bg-bauhaus-red", indicator: "6.3x Performance Multiplier" },
-                      { label: "Deployment Cycle Window", tradVal: 90, aiVal: 5, color: "bg-bauhaus-blue", indicator: "94% Speed Recovery" },
-                      { label: "Specification Precision", tradVal: 65, aiVal: 99, color: "bg-bauhaus-yellow text-black animate-pulse", indicator: "Zero Invariant Failures" },
-                      { label: "Parallel Workflow Concurrency", tradVal: 8, aiVal: 98, color: "bg-black text-white", indicator: "12x Agent Nodes Running" }
-                    ].map((metric, i) => (
-                      <div key={i} className="space-y-2">
-                        <div className="flex justify-between items-center text-[10px] font-black uppercase">
-                          <span>{metric.label}</span>
-                          <span className="font-mono text-[9px] bg-stone-100 border border-black px-1.5">{metric.indicator}</span>
-                        </div>
-                        
-                        {/* Comparison progress tracks */}
-                        <div className="border-4 border-black p-1.5 bg-stone-100 flex flex-col gap-1.5">
-                          {/* Traditional */}
-                          <div className="flex items-center gap-2">
-                            <span className="text-[8px] font-mono font-black uppercase w-20 shrink-0 select-none text-stone-500">TRADITIONAL:</span>
-                            <div className="flex-1 bg-stone-300 h-3 border border-stone-400 relative">
-                              <div className="bg-stone-500 h-full" style={{ width: `${metric.tradVal}%` }}></div>
-                            </div>
-                            <span className="text-[10px] font-mono font-bold w-10 text-right">{metric.tradVal}%</span>
-                          </div>
-                          
-                          {/* AI-Optimized */}
-                          <div className="flex items-center gap-2">
-                            <span className="text-[8px] font-mono font-black uppercase w-20 shrink-0 text-black">AI-OPTIMIZED:</span>
-                            <div className="flex-1 bg-stone-200 h-5 border-2 border-black relative">
-                              <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: `${metric.aiVal}%` }}
-                                transition={{ delay: i * 0.15, duration: 1 }}
-                                className={`h-full ${metric.color}`}
-                              ></motion.div>
-                            </div>
-                            <span className="text-[11px] font-mono font-black w-10 text-right">{metric.aiVal}%</span>
-                          </div>
-                        </div>
-                      </div>
+                      { scale: 'PROTOTYPE', label: 'Simple Prototype', hrsSaved: '37 Hours Saved', desc: 'Single-view client widgets & micro experiments' },
+                      { scale: 'WEB_APP', label: 'Medium Web App', hrsSaved: '222 Hours Saved', desc: 'Full-stack dashboard platforms with database auth specs' },
+                      { scale: 'ENTERPRISE', label: 'Enterprise Platform', hrsSaved: '1115 Hours Saved', desc: 'Secure cloud service meshes, multi-user websockets' }
+                    ].map((scaleObj) => (
+                      <button
+                        key={scaleObj.scale}
+                        onClick={() => setMetricProjectScale(scaleObj.scale as any)}
+                        className={`flex-1 text-left p-3 border-2 transition-all duration-200 outline-none ${
+                          metricProjectScale === scaleObj.scale
+                            ? 'bg-bauhaus-yellow text-black border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] translate-x-[-1px] translate-y-[-1px]'
+                            : 'bg-white text-stone-500 border-stone-300 hover:border-black hover:bg-stone-50'
+                        }`}
+                      >
+                        <div className="font-mono text-[8px] font-black block opacity-60 uppercase">{scaleObj.hrsSaved}</div>
+                        <h4 className="font-extrabold text-xs uppercase tracking-tight mt-0.5">{scaleObj.label}</h4>
+                        <p className="text-[9px] text-stone-500 hidden md:block leading-tight font-medium mt-1">{scaleObj.desc}</p>
+                      </button>
                     ))}
                   </div>
 
-                  {/* Right Column: Key performance indexes */}
-                  <div className="border-4 border-black p-8 bg-black text-white flex flex-col justify-between">
-                    <div>
-                      <h3 className="font-black text-2xl uppercase tracking-tighter mb-4 text-bauhaus-yellow">SYSTEM VELOCITY GAINS</h3>
-                      <p className="font-mono text-xs leading-relaxed text-stone-300 text-left">
-                        Total workspace optimization means replacing manual execution loops with secure, server-driven autonomous agent proxies. 
-                        Every specification is crosschecked with high-fidelity validation models prior to output compilation. This results in standard-setting precision margins.
-                      </p>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 text-left">
+                    {/* Left Column: Visual progress charts */}
+                    <div className="space-y-6">
+                      <h3 className="font-black text-xl uppercase tracking-tighter border-b-2 border-black pb-2">PRODUCTIVITY INTENSITY BAR</h3>
+                      
+                      {dynamicScale.metrics.map((metric, i) => (
+                        <div key={i} className="space-y-2">
+                          <div className="flex justify-between items-center text-[10px] font-black uppercase">
+                            <span>{metric.label}</span>
+                            <span className="font-mono text-[9px] bg-stone-100 border border-black px-1.5">{metric.indicator}</span>
+                          </div>
+                          
+                          {/* Comparison progress tracks */}
+                          <div className="border-4 border-black p-1.5 bg-stone-100 flex flex-col gap-1.5">
+                            {/* Traditional */}
+                            <div className="flex items-center gap-2">
+                              <span className="text-[8px] font-mono font-black uppercase w-20 shrink-0 select-none text-stone-500">TRADITIONAL:</span>
+                              <div className="flex-1 bg-stone-300 h-3 border border-stone-400 relative">
+                                <div className="bg-stone-500 h-full" style={{ width: `${metric.tradVal}%` }}></div>
+                              </div>
+                              <span className="text-[10px] font-mono font-bold w-10 text-right">{metric.tradVal}%</span>
+                            </div>
+                            
+                            {/* AI-Optimized */}
+                            <div className="flex items-center gap-2">
+                              <span className="text-[8px] font-mono font-black uppercase w-20 shrink-0 text-black">AI-OPTIMIZED:</span>
+                              <div className="flex-1 bg-stone-200 h-5 border-2 border-black relative">
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${metric.aiVal}%` }}
+                                  transition={{ duration: 0.5 }}
+                                  className={`h-full ${metric.color}`}
+                                ></motion.div>
+                              </div>
+                              <span className="text-[11px] font-mono font-black w-10 text-right">{metric.aiVal}%</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 mt-8 border-t border-stone-800 pt-6">
-                      <div className="border-2 border-bauhaus-red p-4 bg-stone-900">
-                        <span className="text-[10px] font-mono uppercase text-bauhaus-red font-black block">VELOCITY INDEX</span>
-                        <p className="text-4xl font-extrabold tracking-tighter mt-1">+400%</p>
-                        <p className="text-[9px] text-stone-500 mt-1 uppercase font-bold leading-tight">Average production speedup</p>
+                    {/* Right Column: Key performance indexes */}
+                    <div className="border-4 border-black p-8 bg-black text-white flex flex-col justify-between">
+                      <div>
+                        <h3 className="font-black text-2xl uppercase tracking-tighter mb-4 text-bauhaus-yellow">SYSTEM VELOCITY GAINS</h3>
+                        <p className="font-mono text-xs leading-relaxed text-stone-300 text-left">
+                          Total workspace optimization means replacing manual execution loops with secure, server-driven autonomous agent proxies. 
+                          Every specification is crosschecked with high-fidelity validation models prior to output compilation. This results in standard-setting precision margins.
+                        </p>
                       </div>
 
-                      <div className="border-2 border-bauhaus-blue p-4 bg-stone-900">
-                        <span className="text-[10px] font-mono uppercase text-bauhaus-blue font-black block">LOGISTICAL MARGIN</span>
-                        <p className="text-4xl font-extrabold tracking-tighter mt-1">~1%</p>
-                        <p className="text-[9px] text-stone-500 mt-1 uppercase font-bold leading-tight">Post-optimization error rates</p>
+                      <div className="grid grid-cols-2 gap-4 mt-8 border-t border-stone-800 pt-6">
+                        <div className="border-2 border-bauhaus-red p-4 bg-stone-900">
+                          <span className="text-[10px] font-mono uppercase text-bauhaus-red font-black block">SAVINGS INTENSITY</span>
+                          <p className="text-3xl font-extrabold tracking-tighter mt-1 text-bauhaus-red">{dynamicScale.savingPercent}</p>
+                          <p className="text-[9px] text-stone-500 mt-1 uppercase font-bold leading-tight">Average production time saved</p>
+                        </div>
+
+                        <div className="border-2 border-bauhaus-blue p-4 bg-stone-900">
+                          <span className="text-[10px] font-mono uppercase text-bauhaus-blue font-black block">BUDGET ESTIMATE</span>
+                          <p className="text-xs font-mono mt-1 font-black">TRAD: <span className="line-through">{dynamicScale.costTrad}</span></p>
+                          <p className="text-xl font-extrabold tracking-tighter text-bauhaus-yellow">AI: {dynamicScale.costAI}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            )}
+                </motion.div>
+              );
+            })()}
 
             {/* --- NODE 12: AI SYSTEM LOG --- */}
             {activeNode === 12 && (
@@ -1687,6 +1977,59 @@ const NeuralLab = () => {
                   </div>
                   <FileCode size={32} className="text-stone-900" />
                 </div>
+
+                {/* Post A Protocol Entry Form */}
+                <form onSubmit={handleCreateSystemLog} className="border-4 border-black p-6 bg-stone-50 space-y-4 text-left">
+                  <div className="border-b-2 border-black pb-2 flex justify-between items-center">
+                    <h3 className="font-extrabold text-sm uppercase text-black">POST A SYSTEM PROTOCOL ENTRY</h3>
+                    <span className="text-[9px] font-mono font-bold bg-black text-white px-2 py-0.5">LOGGER PROTOCOL</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black uppercase text-stone-600 block leading-tight">LOG CLASSIFICATION:</label>
+                      <select
+                        value={newLogCategory}
+                        onChange={(e) => setNewLogCategory(e.target.value as any)}
+                        className="w-full border-2 border-black p-2 font-mono text-xs font-bold uppercase outline-none bg-white focus:bg-bauhaus-yellow text-black"
+                      >
+                        <option value="PROTO">PROTO (TECHNICAL STUDY)</option>
+                        <option value="TREND">TREND (INDUSTRY EVOLUTION)</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1 md:col-span-2">
+                      <label className="text-[10px] font-black uppercase text-stone-600 block leading-tight">ENTRY PROTOCOL TITLE:</label>
+                      <input
+                        type="text"
+                        value={newLogTitle}
+                        onChange={(e) => setNewLogTitle(e.target.value)}
+                        placeholder="E.G. INTRODUCING DEEP RESEARCH STREAMLINING..."
+                        className="w-full border-2 border-black p-2 font-mono text-xs font-bold uppercase outline-none bg-white focus:bg-bauhaus-yellow text-black"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase text-stone-600 block leading-tight">LOG DETAIL / PROTOCOL SPECIFICATION DESC:</label>
+                    <textarea
+                      value={newLogDesc}
+                      onChange={(e) => setNewLogDesc(e.target.value)}
+                      placeholder="ENTER COMPREHENSIVE RECAP OR ARCHITECTURAL DISCOVERY..."
+                      rows={2}
+                      className="w-full border-2 border-black p-2.5 font-mono text-xs font-medium uppercase outline-none bg-white focus:bg-bauhaus-yellow text-black resize-none"
+                      required
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full bg-black text-white font-black uppercase text-xs tracking-wider border-4 border-black p-3 hover:bg-bauhaus-red transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] active:translate-x-0 active:translate-y-0 active:shadow-none"
+                  >
+                    INSTANTIATE PROTOCOL NOTE
+                  </button>
+                </form>
 
                 {/* Filter and Search */}
                 <div className="flex flex-col sm:flex-row gap-4 items-center justify-between border-2 border-black p-4 bg-stone-50">
@@ -1713,47 +2056,39 @@ const NeuralLab = () => {
                 </div>
 
                 <div className="space-y-4 max-h-[500px] overflow-y-auto custom-scrollbar pr-2 text-left">
-                  {[
-                    {
-                      id: 'PROTO_NOTE_820',
-                      category: 'PROTO',
-                      date: '2026-06-03',
-                      title: 'Gemini 1.5 Context Caching cost optimization strategy',
-                      desc: 'By taking advantage of context caching inside client-specific API pipelines, we observed an average of 80% cost reduction. Initializing pre-loaded system rules, Bauhaus layouts, and i18n locales inside the cache optimizes context load latency down to sub-1.2s.'
-                    },
-                    {
-                      id: 'PROTO_NOTE_811',
-                      category: 'TREND',
-                      date: '2026-05-28',
-                      title: 'The paradigm shift from Chat interfaces to Autonomous Process Graphs',
-                      desc: 'Static conversation layers are highly inefficient. The future belongs to interconnected directed acyclic graph (DAG) pipelines, where individual micro-agent modules trigger based on task telemetry. True utility comes from structured code compilers that lint and validate outputs autonomously.'
-                    },
-                    {
-                      id: 'PROTO_NOTE_799',
-                      category: 'PROTO',
-                      date: '2026-05-15',
-                      title: 'Applying Bauhaus constraints to automatic SVG layout generators',
-                      desc: 'Mathematical shape generation is far superior to pre-designed SVGs. Feeding rigid coordinates, limited CSS grid bounds, and precise Bauhaus palette parameters ensures absolute design alignment, avoiding typical AI graphic bloat or over-decoration.'
-                    }
-                  ]
-                    .filter((log) => selectedLogCategory === 'ALL' || log.category === selectedLogCategory)
-                    .filter((log) => log.title.toLowerCase().includes(logSearchQuery.toLowerCase()) || log.desc.toLowerCase().includes(logSearchQuery.toLowerCase()))
-                    .map((log) => (
-                      <div key={log.id} className="border-4 border-black p-6 bg-white hover:border-bauhaus-red transition-all font-mono">
-                        <div className="flex justify-between items-start gap-4">
-                          <span className={`text-[9px] font-black px-2 py-0.5 border border-black ${
-                            log.category === 'PROTO' ? 'bg-bauhaus-red text-white' : 'bg-bauhaus-blue text-white'
-                          }`}>{log.category} // {log.id}</span>
-                          <span className="text-[10px] text-stone-500 font-bold">{log.date}</span>
+                  {(() => {
+                    const merged = [
+                      ...firestoreSystemLogs,
+                      ...localSystemLogs.filter((local) => !firestoreSystemLogs.some((f) => f.title === local.title))
+                    ];
+                    return merged
+                      .filter((log) => selectedLogCategory === 'ALL' || log.category === selectedLogCategory)
+                      .filter((log) => log.title.toLowerCase().includes(logSearchQuery.toLowerCase()) || log.desc.toLowerCase().includes(logSearchQuery.toLowerCase()))
+                      .map((log) => (
+                        <div key={log.id || log.title} className="border-4 border-black p-6 bg-white hover:border-bauhaus-red transition-all font-mono">
+                          <div className="flex justify-between items-start gap-4">
+                            <span className={`text-[9px] font-black px-2 py-0.5 border border-black ${
+                              log.category === 'PROTO' ? 'bg-bauhaus-red text-white' : 'bg-bauhaus-blue text-white'
+                            }`}>{log.category} // {log.id || 'PRESET'}</span>
+                            <span className="text-[10px] text-stone-500 font-bold">{log.date}</span>
+                          </div>
+                          <h4 className="font-extrabold text-sm text-black uppercase mt-2">{log.title}</h4>
+                          <p className="text-xs text-stone-700 leading-relaxed mt-3 bg-stone-50 p-4 border border-stone-200">
+                            {log.desc}
+                          </p>
                         </div>
-                        <h4 className="font-extrabold text-sm text-black uppercase mt-2">{log.title}</h4>
-                        <p className="text-xs text-stone-700 leading-relaxed mt-3 bg-stone-50 p-4 border border-stone-200">
-                          {log.desc}
-                        </p>
-                      </div>
-                    ))}
+                      ));
+                  })()}
                 </div>
               </motion.div>
+            )}
+
+            {activeNode === 13 && (
+              <NeuralTranslationCompiler />
+            )}
+
+            {activeNode === 14 && (
+              <NeuralCodeDeconstructor />
             )}
 
           </AnimatePresence>

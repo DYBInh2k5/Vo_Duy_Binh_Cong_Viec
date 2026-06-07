@@ -95,9 +95,40 @@
         "timestamp": { "type": "string", "format": "date-time" }
       },
       "required": ["type", "query", "response", "timestamp"]
+    },
+    "SystemLog": {
+      "title": "System Log",
+      "description": "Technical study or industry evolution trend log entry",
+      "type": "object",
+      "properties": {
+        "category": { "type": "string" },
+        "title": { "type": "string" },
+        "desc": { "type": "string" },
+        "date": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["category", "title", "desc", "date", "timestamp"]
+    },
+    "WorkspaceBlueprint": {
+      "title": "Workspace Blueprint Task",
+      "description": "Custom task specifications injected into the automation pipeline",
+      "type": "object",
+      "properties": {
+        "task": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["task", "timestamp"]
     }
   },
   "firestore": {
+    "/system_logs/{logId}": {
+      "schema": "SystemLog",
+      "description": "System-wide protocol, study, and tech trend logs"
+    },
+    "/workspace_blueprints/{blueprintId}": {
+      "schema": "WorkspaceBlueprint",
+      "description": "Injected custom automation task specifications"
+    },
     "/cv_generations/{id}": {
       "schema": "CVGeneration",
       "description": "Logs of generated custom resumes"

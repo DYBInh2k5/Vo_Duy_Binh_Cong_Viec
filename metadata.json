@@ -2,7 +2,8 @@
   "name": "coDY - Portfolio",
   "description": "Architect-Innovator Portfolio. Synthesizing Bauhaus principles with modern technical engineering. Fullstack Developer & AI Engineer.",
   "requestFramePermissions": [
-    "microphone"
+    "microphone",
+    "geolocation"
   ],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

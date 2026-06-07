@@ -81,7 +81,34 @@ service cloud.firestore {
              data.timestamp is timestamp;
     }
 
+    function isValidSystemLog(data) {
+      return data.keys().hasAll(['category', 'title', 'desc', 'date', 'timestamp']) &&
+             data.category is string && (data.category == 'PROTO' || data.category == 'TREND') &&
+             data.title is string && data.title.size() <= 300 &&
+             data.desc is string && data.desc.size() <= 5000 &&
+             data.date is string &&
+             data.timestamp is timestamp;
+    }
+
+    function isValidWorkspaceBlueprint(data) {
+      return data.keys().hasAll(['task', 'timestamp']) &&
+             data.task is string && data.task.size() <= 300 &&
+             data.timestamp is timestamp;
+    }
+
     // --- Collections ---
+
+    match /system_logs/{logId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidId(logId) && isValidSystemLog(incoming());
+      allow update, delete: if isAdmin();
+    }
+
+    match /workspace_blueprints/{blueprintId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidId(blueprintId) && isValidWorkspaceBlueprint(incoming());
+      allow update, delete: if isAdmin();
+    }
 
     match /cv_generations/{id} {
       allow create: if isValidId(id) && isValidCVGeneration(incoming());
