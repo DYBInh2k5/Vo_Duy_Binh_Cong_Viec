@@ -59,6 +59,49 @@ const NeuralLab = () => {
   const [isLoadingDashboard, setIsLoadingDashboard] = useState(false);
   const [isSyncingState, setIsSyncingState] = useState(false);
 
+  // --- NODE 9: AI WORKSPACE BLUEPRINT STATES ---
+  const [activeBlueprintInput, setActiveBlueprintInput] = useState('Build Portfolio Landing Page');
+  const [activeWorkflowStep, setActiveWorkflowStep] = useState(0); 
+  const [workflowSimulationState, setWorkflowSimulationState] = useState<'IDLE' | 'RUNNING' | 'COMPLETED'>('IDLE');
+  const [blueprintLogs, setBlueprintLogs] = useState<string[]>(['[BLUEPRINT SYSTEM]: Ready for task initialization.']);
+  
+  // --- NODE 10: PROMPT VAULT STATES ---
+  const [copiedPromptId, setCopiedPromptId] = useState<string | null>(null);
+
+  // --- NODE 12: AI SYSTEM LOG STATES ---
+  const [selectedLogCategory, setSelectedLogCategory] = useState<'ALL' | 'PROTO' | 'TREND'>('ALL');
+  const [logSearchQuery, setLogSearchQuery] = useState('');
+
+  const runWorkflowSimulation = () => {
+    if (workflowSimulationState === 'RUNNING') return;
+    setWorkflowSimulationState('RUNNING');
+    setActiveWorkflowStep(1);
+    setBlueprintLogs([`[INITIALIZED]: Input directive "${activeBlueprintInput}" received.`]);
+
+    let step = 1;
+    const interval = setInterval(() => {
+      step += 1;
+      setActiveWorkflowStep(step);
+      
+      const logMessages = [
+        "", // dummy index 0
+        `[INPUT NODE]: Client request parsed. Extracting task specs.`,
+        `[INTENT ANALYSIS]: Mapping prompt tokens with Gemini neural matrix. Core entities found.`,
+        `[DECONSTRUCTOR]: Task fragmented into 4 sub-modules: Layout, Theme integration, CSS constraints, Build telemetry.`,
+        `[SYNTHESIS ENGINE]: Transpiling components to rigid React DOM with verified Bauhaus inline parameters.`,
+        `[AUTO-VALIDATION]: Executing standard bundler logic. Linter check COMPLETE. Zero warnings found.`,
+        `[DELIVERY PLATFORM]: Pipeline compiled successfully. Asset pushed to Live Preview Sandbox!`
+      ];
+
+      setBlueprintLogs(prev => [...prev, logMessages[step] || `[STEP_${step}]: Proceeding components logic.`]);
+
+      if (step >= 6) {
+        clearInterval(interval);
+        setWorkflowSimulationState('COMPLETED');
+      }
+    }, 1200);
+  };
+
   // Initialize Audio Source context on first click
   const initAudioContext = () => {
     if (!audioCtxRef.current) {
@@ -312,9 +355,9 @@ const NeuralLab = () => {
     themeTitle: "Neural Architecture Focus",
     philosophyStatement: "SYSTEM EFFICIENCY & STRUCTURAL TRANSPARENCY OVER GRAPHIC DECORATIONS.",
     technicalSkills: [
-      { title: "WebSocket Live Integration", category: "AI Node", competency: "98%" },
-      { title: "JSON Schema Enforcement", category: "Reliability", competency: "95%" },
-      { title: "Context Caching Retrieval", category: "Database", competency: "90%" }
+      { title: "Universal AI Tool Mastery", category: "AI Orchestration", competency: "100%" },
+      { title: "End-to-End Task & Workflow Automation", category: "System Velocity", competency: "99%" },
+      { title: "Gemini / LLM Framework Integration", category: "Neural Node", competency: "98%" }
     ],
     gridManifesto: [
       { nodeId: "GRID_01", label: "Structural Blueprint", value: "React 19 core mapped with zero-fluff modular layout engines.", accentColor: "bauhaus-red" },
@@ -486,7 +529,7 @@ const NeuralLab = () => {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            {[1, 2, 3, 4, 6, 7, 8].map((num) => (
+            {[1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12].map((num) => (
               <button
                 key={num}
                 onClick={() => setActiveNode(num)}
@@ -519,7 +562,11 @@ const NeuralLab = () => {
                 { id: 4, tag: 'NODE 04', title: 'Context Caching', color: 'bg-black text-white', desc: 'Rapid lookup indexing on the codebase schemas' },
                 { id: 6, tag: 'NODE 06', title: 'Bauhaus SVG Art', color: 'bg-bauhaus-red text-white', desc: 'Algorithmic dynamic shape design via Structured outputs' },
                 { id: 7, tag: 'NODE 07', title: 'Blueprint Sandbox', color: 'bg-bauhaus-blue text-white', desc: 'Interactive compiler sandbox executing HTML/CSS/JS' },
-                { id: 8, tag: 'NODE 08', title: 'Firebase Portal', color: 'bg-bauhaus-yellow text-black', desc: 'Real-time sync telemetry analytics under strict admin auth rules' }
+                { id: 8, tag: 'NODE 08', title: 'Firebase Portal', color: 'bg-bauhaus-yellow text-black', desc: 'Real-time sync telemetry analytics under strict admin auth rules' },
+                { id: 9, tag: 'NODE 09', title: 'Workspace Blueprint', color: 'bg-bauhaus-red text-white', desc: 'Interactive interconnected agent automation workflow visualization' },
+                { id: 10, tag: 'NODE 10', title: 'Prompt Crafting Vault', color: 'bg-bauhaus-blue text-white', desc: 'Production-ready prompt engineering assets with quick copy functionality' },
+                { id: 11, tag: 'NODE 11', title: 'Efficiency Metrics', color: 'bg-bauhaus-yellow text-black', desc: 'Granular comparison charts of traditional vs AI-optimized pipelines' },
+                { id: 12, tag: 'NODE 12', title: 'AI System Log', color: 'bg-black text-white', desc: 'Short-form protocol notes tracking model trends and system telemetry' }
               ].map((node) => (
                 <button
                   key={node.id}
@@ -1338,6 +1385,377 @@ const NeuralLab = () => {
                 )}
               </motion.div>
             )}
+
+            {/* --- NODE 9: AI WORKSPACE BLUEPRINT --- */}
+            {activeNode === 9 && (
+              <motion.div
+                key="node-9"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="bg-white border-8 border-black p-8 hard-shadow-lg space-y-6 lg:col-span-8 w-full"
+              >
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b-4 border-black pb-4">
+                  <div>
+                    <span className="text-xs font-black bg-bauhaus-red text-white px-3 py-1 uppercase tracking-widest">NODE 09 // AUTOMATION</span>
+                    <h2 className="text-4xl font-extrabold uppercase tracking-tighter mt-2">AI WORKSPACE BLUEPRINT</h2>
+                    <p className="text-xs font-bold text-stone-600 uppercase tracking-wider mt-1">Interconnected agent processing graph for automated software orchestration</p>
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    <div className="w-4 h-4 bg-bauhaus-red border-2 border-black rounded-full animate-pulse"></div>
+                    <span className="font-bold text-[10px] uppercase font-mono bg-stone-100 px-2 py-1 border border-black">PIPELINE: ACTIVE</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {['Build Portfolio Landing Page', 'Debug Relational SQL Schema', 'Draft Optimized Social Video Script'].map((inputTask) => (
+                    <button
+                      key={inputTask}
+                      onClick={() => {
+                        if (workflowSimulationState !== 'RUNNING') {
+                          setActiveBlueprintInput(inputTask);
+                          setActiveWorkflowStep(0);
+                          setBlueprintLogs([`[BLUEPRINT SYSTEM]: Configured task to "${inputTask}". Ready to run simulation.`]);
+                        }
+                      }}
+                      disabled={workflowSimulationState === 'RUNNING'}
+                      className={`text-left p-4 border-4 border-black transition-all font-mono text-xs uppercase ${
+                        activeBlueprintInput === inputTask
+                          ? 'bg-bauhaus-yellow text-black translate-x-[-2px] translate-y-[-2px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
+                          : 'bg-white text-stone-500 hover:bg-stone-50 hover:text-black'
+                      }`}
+                    >
+                      <span className="text-[9px] font-black block opacity-60 mb-1">TASK DIRECTIVE SELECTOR:</span>
+                      {inputTask}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Sơ đồ liên kết (The Graph Grid) */}
+                <div className="border-4 border-black p-6 bg-stone-50 font-mono relative overflow-hidden">
+                  <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(black 1px, transparent 0)', backgroundSize: '16px 16px' }}></div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 relative z-10">
+                    {[
+                      { step: 1, title: 'INITIATOR', label: 'Inputs Logged', color: 'bg-white text-black border-black' },
+                      { step: 2, title: 'LLM PARSER', label: 'Intent Analysis', color: 'bg-bauhaus-red text-white border-black' },
+                      { step: 3, title: 'AGENT SPLIT', label: 'Work Plan', color: 'bg-bauhaus-blue text-white border-black' },
+                      { step: 4, title: 'SYNTHESIZER', label: 'React Code', color: 'bg-bauhaus-yellow text-black border-black' },
+                      { step: 5, title: 'VALIDATOR', label: 'Linter Checks', color: 'bg-black text-white border-black' },
+                      { step: 6, title: 'DELIVERY', label: 'Live Sandbox', color: 'bg-stone-200 text-black border-black' }
+                    ].map((stepObj) => {
+                      const isActive = activeWorkflowStep === stepObj.step;
+                      const isProcessed = activeWorkflowStep > stepObj.step;
+                      return (
+                        <div
+                          key={stepObj.step}
+                          className={`p-4 border-4 transition-all duration-300 relative ${
+                            isActive
+                              ? `scale-105 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] ${stepObj.color}`
+                              : isProcessed
+                              ? 'bg-stone-300 opacity-60 text-stone-600 line-through border-stone-500'
+                              : 'bg-white text-stone-700 border-black'
+                          }`}
+                        >
+                          <div className={`absolute top-[-14px] left-2 px-1.5 py-0.5 border-2 border-black text-[9px] font-black ${
+                            isActive ? 'bg-black text-white' : 'bg-white text-black'
+                          }`}>
+                            0{stepObj.step}
+                          </div>
+                          
+                          <div className="mt-2">
+                            <h4 className="font-extrabold text-[11px] uppercase tracking-tight">{stepObj.title}</h4>
+                            <p className="text-[9px] uppercase font-bold text-stone-500 mt-1">{stepObj.label}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Flow Trigger & Visual Console output */}
+                  <div className="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+                    <div className="lg:col-span-4 flex flex-col justify-center">
+                      <button
+                        onClick={runWorkflowSimulation}
+                        disabled={workflowSimulationState === 'RUNNING'}
+                        className="w-full bg-black text-white p-4 font-black uppercase text-sm tracking-wider border-4 border-black hover:bg-bauhaus-red transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-0 active:translate-y-0 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                      >
+                        {workflowSimulationState === 'RUNNING' ? 'ORCHESTRATING...' : 'RUN AUTOMATION PIPELINE'}
+                      </button>
+                      
+                      <div className="mt-4 text-xs font-bold text-stone-600 uppercase tracking-widest text-center">
+                        Active Step: {activeWorkflowStep === 0 ? 'IDLE' : `0${activeWorkflowStep} / 06`}
+                      </div>
+                    </div>
+
+                    {/* Console Logger */}
+                    <div className="lg:col-span-8 border-4 border-black p-4 bg-black text-lime-400 font-mono text-xs uppercase h-48 overflow-y-auto custom-scrollbar flex flex-col justify-end">
+                      <div className="border-b border-stone-800 pb-2 mb-2 text-stone-500 flex justify-between font-bold">
+                        <span>SYSTEM LIVE TELEMETRY STREAM</span>
+                        <span className="text-[10px] animate-pulse text-red-500">● LIVE</span>
+                      </div>
+                      <div className="space-y-1 overflow-y-auto max-h-32 text-left">
+                        {blueprintLogs.map((log, index) => (
+                          <div key={index} className="leading-tight">
+                            <span className="text-stone-500">[{new Date().toLocaleTimeString()}]:</span> {log}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* --- NODE 10: PROMPT CRAFTING VAULT --- */}
+            {activeNode === 10 && (
+              <motion.div
+                key="node-10"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="bg-white border-8 border-black p-8 hard-shadow-lg space-y-6 lg:col-span-8 w-full"
+              >
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b-4 border-black pb-4">
+                  <div>
+                    <span className="text-xs font-black bg-bauhaus-blue text-white px-3 py-1 uppercase tracking-widest">NODE 10 // PRAGMATISM</span>
+                    <h2 className="text-4xl font-extrabold uppercase tracking-tighter mt-2">PROMPT CRAFTING VAULT</h2>
+                    <p className="text-xs font-bold text-stone-600 uppercase tracking-wider mt-1">Sovereign prompt engineering templates for enterprise grade AI operations</p>
+                  </div>
+                  <Terminal size={32} className="text-bauhaus-blue" />
+                </div>
+
+                <div className="grid grid-cols-1 gap-6">
+                  {[
+                    {
+                      id: 'prompt_1',
+                      title: 'JSON Schema Enforcement Protocol',
+                      purpose: 'Forces any generative model to output strict RFC-compliant JSON arrays without extra preamble.',
+                      promptText: 'System Instruction: You are a strict JSON serialization node. Translate the user query into the following JSON shape. Respond with ONLY the raw JSON block inside a single code block. Do NOT include markdown text outside of the block.\nJSON Schema:\n{\n  "results": [\n    { "nodeId": "string", "label": "string", "velocityMultiplier": "number" }\n  ]\n}'
+                    },
+                    {
+                      id: 'prompt_2',
+                      title: 'Micro-Agent Business Task Decomposition',
+                      purpose: 'Converts complex, long user directives into clean, isolated, sequential actions for linear developer teams.',
+                      promptText: 'Task Orchestration Prompt: Deconstruct the following project specification into atomic, non-overlapping tasks. For each task, define:\n1. Execution Context (Inputs & expected payload)\n2. Success Definition (Lint constraints, functional invariants)\n3. Complexity Weight (1-5 Fibonacci)\nAnalyze text for boundaries first.'
+                    },
+                    {
+                      id: 'prompt_3',
+                      title: 'Bauhaus Architectural Design Syntax Generator',
+                      purpose: 'Generates specific SVG coordinate logic and color metrics based on emotional parameters.',
+                      promptText: 'System Instruction: Translate user query into a vector canvas blueprint conforming strictly to Bauhaus Brutalism guidelines:\n- Color grid: only #FF0000, #0000FF, #FFFF00, #000000, #FFFFFF\n- Structural elements: absolute rigid lines, circles, boxes. Form follows function.\nOutput a JSON list of coordinate arrays.'
+                    }
+                  ].map((vaultObj) => (
+                    <div key={vaultObj.id} className="border-4 border-black bg-stone-50 p-6 flex flex-col justify-between hover:bg-white transition-colors text-left">
+                      <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                        <div>
+                          <span className="text-[10px] font-mono font-black uppercase text-stone-500">ASSET LOGICAL_ID: {vaultObj.id.toUpperCase()}</span>
+                          <h4 className="font-extrabold text-lg uppercase tracking-tight mt-1 text-black">{vaultObj.title}</h4>
+                          <p className="text-xs font-bold text-stone-600 leading-normal mt-1 italic">{vaultObj.purpose}</p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(vaultObj.promptText);
+                            setCopiedPromptId(vaultObj.id);
+                            setTimeout(() => setCopiedPromptId(null), 2000);
+                          }}
+                          className={`px-3 py-2 border-2 border-black font-semibold font-mono text-[10px] flex items-center gap-2 uppercase transition-all shrink-0 self-start sm:self-center ${
+                            copiedPromptId === vaultObj.id ? 'bg-green-500 text-white' : 'bg-white hover:bg-black hover:text-white'
+                          }`}
+                        >
+                          {copiedPromptId === vaultObj.id ? 'COPIED' : 'COPY ASSET'}
+                        </button>
+                      </div>
+
+                      <div className="mt-4 border-t-2 border-stone-300 pt-4">
+                        <pre className="font-mono text-xs text-stone-800 bg-white p-4 border border-stone-300 overflow-x-auto whitespace-pre-wrap select-all">
+                          {vaultObj.promptText}
+                        </pre>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* --- NODE 11: AI EFFICIENCY METRICS --- */}
+            {activeNode === 11 && (
+              <motion.div
+                key="node-11"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="bg-white border-8 border-black p-8 hard-shadow-lg space-y-6 lg:col-span-8 w-full"
+              >
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b-4 border-black pb-4 text-left">
+                  <div>
+                    <span className="text-xs font-black bg-bauhaus-yellow text-black px-3 py-1 uppercase tracking-widest">NODE 11 // TELEMETRY</span>
+                    <h2 className="text-4xl font-extrabold uppercase tracking-tighter mt-2">AI EFFICIENCY METRICS</h2>
+                    <p className="text-xs font-bold text-stone-600 uppercase tracking-wider mt-1">Audit comparison demonstrating the productivity impact of total AI workspace integration</p>
+                  </div>
+                  <Sparkles size={32} className="text-bauhaus-yellow hidden sm:block" />
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 text-left">
+                  {/* Left Column: Visual progress charts */}
+                  <div className="space-y-6">
+                    <h3 className="font-black text-xl uppercase tracking-tighter border-b-2 border-black pb-2">PRODUCTIVITY INTENSITY BAR</h3>
+                    
+                    {[
+                      { label: "Software Feature Delivery Rate", tradVal: 15, aiVal: 95, color: "bg-bauhaus-red", indicator: "6.3x Performance Multiplier" },
+                      { label: "Deployment Cycle Window", tradVal: 90, aiVal: 5, color: "bg-bauhaus-blue", indicator: "94% Speed Recovery" },
+                      { label: "Specification Precision", tradVal: 65, aiVal: 99, color: "bg-bauhaus-yellow text-black animate-pulse", indicator: "Zero Invariant Failures" },
+                      { label: "Parallel Workflow Concurrency", tradVal: 8, aiVal: 98, color: "bg-black text-white", indicator: "12x Agent Nodes Running" }
+                    ].map((metric, i) => (
+                      <div key={i} className="space-y-2">
+                        <div className="flex justify-between items-center text-[10px] font-black uppercase">
+                          <span>{metric.label}</span>
+                          <span className="font-mono text-[9px] bg-stone-100 border border-black px-1.5">{metric.indicator}</span>
+                        </div>
+                        
+                        {/* Comparison progress tracks */}
+                        <div className="border-4 border-black p-1.5 bg-stone-100 flex flex-col gap-1.5">
+                          {/* Traditional */}
+                          <div className="flex items-center gap-2">
+                            <span className="text-[8px] font-mono font-black uppercase w-20 shrink-0 select-none text-stone-500">TRADITIONAL:</span>
+                            <div className="flex-1 bg-stone-300 h-3 border border-stone-400 relative">
+                              <div className="bg-stone-500 h-full" style={{ width: `${metric.tradVal}%` }}></div>
+                            </div>
+                            <span className="text-[10px] font-mono font-bold w-10 text-right">{metric.tradVal}%</span>
+                          </div>
+                          
+                          {/* AI-Optimized */}
+                          <div className="flex items-center gap-2">
+                            <span className="text-[8px] font-mono font-black uppercase w-20 shrink-0 text-black">AI-OPTIMIZED:</span>
+                            <div className="flex-1 bg-stone-200 h-5 border-2 border-black relative">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${metric.aiVal}%` }}
+                                transition={{ delay: i * 0.15, duration: 1 }}
+                                className={`h-full ${metric.color}`}
+                              ></motion.div>
+                            </div>
+                            <span className="text-[11px] font-mono font-black w-10 text-right">{metric.aiVal}%</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Right Column: Key performance indexes */}
+                  <div className="border-4 border-black p-8 bg-black text-white flex flex-col justify-between">
+                    <div>
+                      <h3 className="font-black text-2xl uppercase tracking-tighter mb-4 text-bauhaus-yellow">SYSTEM VELOCITY GAINS</h3>
+                      <p className="font-mono text-xs leading-relaxed text-stone-300 text-left">
+                        Total workspace optimization means replacing manual execution loops with secure, server-driven autonomous agent proxies. 
+                        Every specification is crosschecked with high-fidelity validation models prior to output compilation. This results in standard-setting precision margins.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 mt-8 border-t border-stone-800 pt-6">
+                      <div className="border-2 border-bauhaus-red p-4 bg-stone-900">
+                        <span className="text-[10px] font-mono uppercase text-bauhaus-red font-black block">VELOCITY INDEX</span>
+                        <p className="text-4xl font-extrabold tracking-tighter mt-1">+400%</p>
+                        <p className="text-[9px] text-stone-500 mt-1 uppercase font-bold leading-tight">Average production speedup</p>
+                      </div>
+
+                      <div className="border-2 border-bauhaus-blue p-4 bg-stone-900">
+                        <span className="text-[10px] font-mono uppercase text-bauhaus-blue font-black block">LOGISTICAL MARGIN</span>
+                        <p className="text-4xl font-extrabold tracking-tighter mt-1">~1%</p>
+                        <p className="text-[9px] text-stone-500 mt-1 uppercase font-bold leading-tight">Post-optimization error rates</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* --- NODE 12: AI SYSTEM LOG --- */}
+            {activeNode === 12 && (
+              <motion.div
+                key="node-12"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="bg-white border-8 border-black p-8 hard-shadow-lg space-y-6 lg:col-span-8 w-full"
+              >
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b-4 border-black pb-4 text-left">
+                  <div>
+                    <span className="text-xs font-black bg-stone-900 text-white px-3 py-1 uppercase tracking-widest">NODE 12 // METADATA</span>
+                    <h2 className="text-4xl font-extrabold uppercase tracking-tighter mt-2">AI SYSTEM JOURNAL & TREND LOG</h2>
+                    <p className="text-xs font-bold text-stone-600 uppercase tracking-wider mt-1">Short system logs capturing AI trends, neural model transitions, and operational paradigms</p>
+                  </div>
+                  <FileCode size={32} className="text-stone-900" />
+                </div>
+
+                {/* Filter and Search */}
+                <div className="flex flex-col sm:flex-row gap-4 items-center justify-between border-2 border-black p-4 bg-stone-50">
+                  <div className="flex gap-2">
+                    {['ALL', 'PROTO', 'TREND'].map((cat) => (
+                      <button
+                        key={cat}
+                        onClick={() => setSelectedLogCategory(cat as any)}
+                        className={`px-3 py-1.5 border-2 border-black font-black text-xs uppercase transition-all ${
+                          selectedLogCategory === cat ? 'bg-black text-white' : 'bg-white hover:bg-stone-100 text-black'
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="FILTER PROTOCOLS..."
+                    value={logSearchQuery}
+                    onChange={(e) => setLogSearchQuery(e.target.value)}
+                    className="border-2 border-black p-2 font-mono font-bold text-xs uppercase focus:bg-bauhaus-yellow outline-none bg-white w-full sm:w-64"
+                  />
+                </div>
+
+                <div className="space-y-4 max-h-[500px] overflow-y-auto custom-scrollbar pr-2 text-left">
+                  {[
+                    {
+                      id: 'PROTO_NOTE_820',
+                      category: 'PROTO',
+                      date: '2026-06-03',
+                      title: 'Gemini 1.5 Context Caching cost optimization strategy',
+                      desc: 'By taking advantage of context caching inside client-specific API pipelines, we observed an average of 80% cost reduction. Initializing pre-loaded system rules, Bauhaus layouts, and i18n locales inside the cache optimizes context load latency down to sub-1.2s.'
+                    },
+                    {
+                      id: 'PROTO_NOTE_811',
+                      category: 'TREND',
+                      date: '2026-05-28',
+                      title: 'The paradigm shift from Chat interfaces to Autonomous Process Graphs',
+                      desc: 'Static conversation layers are highly inefficient. The future belongs to interconnected directed acyclic graph (DAG) pipelines, where individual micro-agent modules trigger based on task telemetry. True utility comes from structured code compilers that lint and validate outputs autonomously.'
+                    },
+                    {
+                      id: 'PROTO_NOTE_799',
+                      category: 'PROTO',
+                      date: '2026-05-15',
+                      title: 'Applying Bauhaus constraints to automatic SVG layout generators',
+                      desc: 'Mathematical shape generation is far superior to pre-designed SVGs. Feeding rigid coordinates, limited CSS grid bounds, and precise Bauhaus palette parameters ensures absolute design alignment, avoiding typical AI graphic bloat or over-decoration.'
+                    }
+                  ]
+                    .filter((log) => selectedLogCategory === 'ALL' || log.category === selectedLogCategory)
+                    .filter((log) => log.title.toLowerCase().includes(logSearchQuery.toLowerCase()) || log.desc.toLowerCase().includes(logSearchQuery.toLowerCase()))
+                    .map((log) => (
+                      <div key={log.id} className="border-4 border-black p-6 bg-white hover:border-bauhaus-red transition-all font-mono">
+                        <div className="flex justify-between items-start gap-4">
+                          <span className={`text-[9px] font-black px-2 py-0.5 border border-black ${
+                            log.category === 'PROTO' ? 'bg-bauhaus-red text-white' : 'bg-bauhaus-blue text-white'
+                          }`}>{log.category} // {log.id}</span>
+                          <span className="text-[10px] text-stone-500 font-bold">{log.date}</span>
+                        </div>
+                        <h4 className="font-extrabold text-sm text-black uppercase mt-2">{log.title}</h4>
+                        <p className="text-xs text-stone-700 leading-relaxed mt-3 bg-stone-50 p-4 border border-stone-200">
+                          {log.desc}
+                        </p>
+                      </div>
+                    ))}
+                </div>
+              </motion.div>
+            )}
+
           </AnimatePresence>
         </div>
       </div>

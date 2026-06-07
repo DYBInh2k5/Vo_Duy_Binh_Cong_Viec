@@ -60,7 +60,7 @@ const Capabilities = () => {
             </div>
             <h2 className="text-2xl font-black uppercase mb-4 tracking-tighter">AI Tools</h2>
             <ul className="flex flex-col gap-3">
-              {['LLM Integration', 'Vector DBs', 'LangChain'].map(item => (
+              {['Full AI Tools Mastery', 'End-to-End Workflow Automation', 'Prompt Engineering & Agents', 'Orchestration (LangChain/RAG)'].map(item => (
                 <li key={item} className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-bauhaus-red border-2 border-black"></div>
                   <span className="font-black uppercase text-xs tracking-widest">{item}</span>

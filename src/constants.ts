@@ -148,8 +148,8 @@ export const EXPERIENCE = [
 ];
 
 export const SKILLS = {
-  tech: ["JavaScript", "TypeScript", "Python", "Java", "C++", "Go", "React", "Next.js", "Node.js", "Spring Boot", "FastAPI", "Go", "Git", "Docker", "Kubernetes", "AWS", "Azure", "GCP"],
-  ai: ["OpenAI GPT", "Claude", "Gemini", "TensorFlow", "PyTorch", "Keras", "Scikit-learn", "OpenCV", "LangChain", "AutoML", "NLP", "LLMs"],
+  tech: ["JavaScript", "TypeScript", "Python", "Java", "C++", "Go", "React", "Next.js", "Node.js", "Spring Boot", "FastAPI", "Git", "Docker", "Kubernetes", "AWS", "Azure", "GCP"],
+  ai: ["Gemini Pro/Flash", "OpenAI GPT-4o", "Claude 3.5 Sonnet", "Full AI Tool Integration (Cursor/Copilot/v0)", "AI Workflow Automation (Make/Zapier/Flows)", "TensorFlow", "PyTorch", "LangChain & RAG", "Prompt Engineering Mastery", "AI Agents & Orchestration"],
   creative: ["Content Creation", "Video Production", "Music Production", "FL Studio", "Ableton Live", "Figma", "Digital Marketing", "Personal Branding", "Public Speaking", "SEO/SEM"]
 };
 
