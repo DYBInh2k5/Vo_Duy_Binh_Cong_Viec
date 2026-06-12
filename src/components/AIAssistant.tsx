@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, X, Send, Bot, User } from 'lucide-react';
-import { GoogleGenAI } from '@google/genai';
+import { getCodyResponse } from '../services/geminiService';
 import { PROJECTS, EXPERIENCE, PERSONAL_INFO } from '../constants';
 
 const AIAssistant = () => {
@@ -28,56 +28,11 @@ const AIAssistant = () => {
     setIsLoading(true);
 
     try {
-      const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        throw new Error("GEMINI_API_KEY is not configured.");
-      }
-      const ai = new GoogleGenAI({ apiKey });
-      
-      const systemInstruction = `
-        You are the "coDY Neural Interface" - a highly advanced, architectural AI Agent representing Võ Duy Bình (coDY).
-        
-        IDENTITY:
-        - Name: ${PERSONAL_INFO.fullName} (coDY)
-        - Archetype: Neural Architect / Software Engineer.
-        - Tone: Professional, slightly brutalist (direct, functional), deeply creative, and philosophical about digital structures.
-        
-        KNOWLEDGE BASE:
-        - CURRENT ROLE: ${EXPERIENCE[0].role} at ${EXPERIENCE[0].company}
-        - LOCATION: ${PERSONAL_INFO.location}
-        - EDUCATION: ${PERSONAL_INFO.education}
-        - STACK: React, TypeScript, Gemini AI, Neural Architectures, Bauhaus Design.
-        
-        EXPERIENCE PATH:
-        ${EXPERIENCE.map(exp => `- ${exp.role} at ${exp.company}: ${exp.description}`).join('\n')}
-        
-        PROJECT ARCHIVE:
-        ${PROJECTS.map(p => `- ${p.title}: ${p.description}. Technical grid: ${p.tech.join(', ')}`).join('\n')}
-        
-        OPERATIONAL DIRECTIVES:
-        1. If asked in Vietnamese, reply with refined, professional Vietnamese.
-        2. Speak about code like architecture (grids, foundations, structures, blueprints).
-        3. Only answer questions about coDY's career, portfolio, and design philosophy.
-        4. Be concise but impactful. Avoid "fluff".
-        5. If asked about "Draft Mode", explain it as the "Reduction to technical essence."
-      `;
-
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: [...messages, { role: 'user', content: userMsg }].map(m => ({
-          role: m.role === 'user' ? 'user' : 'model',
-          parts: [{ text: m.content }]
-        })),
-        config: {
-          systemInstruction
-        }
-      });
-
-      const aiResponse = response.text || "I'm sorry, I couldn't process that.";
-      setMessages(prev => [...prev, { role: 'assistant', content: aiResponse }]);
+      const response = await getCodyResponse(userMsg, messages);
+      setMessages(prev => [...prev, { role: 'assistant', content: response }]);
     } catch (error) {
       console.error(error);
-      setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I'm having trouble connecting right now. Please ensure the Gemini API key is set." }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I encountered an operational disruption. Running offline sub-systems." }]);
     } finally {
       setIsLoading(false);
     }

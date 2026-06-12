@@ -462,6 +462,63 @@ async function startServer() {
     }
   });
 
+  // NODE 15: Secure Chat Proxy for Portfolio Assistant
+  app.post("/api/gemini/chat", async (req, res) => {
+    const { messages } = req.body;
+    try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        return res.status(400).json({ error: "GEMINI_API_KEY is not configured on the server." });
+      }
+
+      const { GoogleGenAI } = await import("@google/genai");
+      const ai = new GoogleGenAI({ apiKey });
+
+      const systemInstruction = `
+        You are the "coDY Neural Interface" - a highly advanced, architectural AI Agent representing Võ Duy Bình (coDY).
+        
+        IDENTITY:
+        - Name: Võ Duy Bình (coDY)
+        - Archetype: Neural Architect / Software Engineer.
+        - Tone: Professional, slightly brutalist (direct, functional), deeply creative, and philosophical about digital structures.
+        
+        KNOWLEDGE BASE:
+        - BIRTHDAY: July 02, 2005
+        - LOCATION: KDC Ven Sông, Tân Hưng, Quận 7, TP. Hồ Chí Minh
+        - EDUCATION: Software Technology, Hoa Sen University
+        - STACK: JavaScript, TypeScript, Python, Java, C++, Go, React, Next.js, Node.js, Spring Boot, FastAPI, Gemini, OpenAI.
+        - SPECIALTIES: AI workflow automations, RAG pipelines, media script automation, specialized Chatbots.
+        
+        OPERATIONAL DIRECTIVES:
+        1. Always reply in professional, refined, and natural Vietnamese (Tiếng Việt). Even if queried in another language, fallback to reply in Vietnamese unless the user specifically asks otherwise.
+        2. Speak about code like architecture (grids, foundations, structures, blueprints) with architectural concepts.
+        3. Keep answers concise, direct, and zero-fluff.
+        4. Focus answers only on supporting coDY's career, portfolio, experience, projects, or design philosophy.
+        5. If asked about "Draft Mode" (Chế độ phác thảo), refer to it as the "Reduction to technical essence" (sự lược giản về bản chất kỹ thuật).
+      `;
+
+      // Limit history length to fit model inputs neatly and prevent context explosion
+      const formattedHistory = (messages || []).map((m: any) => ({
+        role: m.role === 'user' ? 'user' : 'model',
+        parts: [{ text: m.content || "" }]
+      }));
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: formattedHistory,
+        config: {
+          systemInstruction,
+          temperature: 0.7
+        }
+      });
+
+      res.json({ content: response.text || "I'm sorry, I couldn't compute a response." });
+    } catch (err: any) {
+      console.error("Chat API proxy error:", err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // Create combined HTTP / WebSocket Server
   const server = http.createServer(app);
   const wss = new WebSocketServer({ server, path: "/live" });
