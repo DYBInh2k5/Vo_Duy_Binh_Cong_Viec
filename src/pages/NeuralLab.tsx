@@ -3,8 +3,12 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Bot, Mic, MicOff, Search, Cpu, Terminal, FileText, 
   Sparkles, RefreshCw, Radio, FileCode, CheckCircle, ExternalLink,
-  LogIn, LogOut, Palette, Play, Database, Lock, UserCheck, Server
+  LogIn, LogOut, Palette, Play, Database, Lock, UserCheck, Server,
+  Download, Printer, Copy, Check
 } from 'lucide-react';
+import { generateCustomPDF, downloadAsHTML, downloadAsMarkdown } from '../services/cvDownloader';
+import { DynamicQRCodeCard } from '../components/DynamicQRCodeCard';
+import { PERSONAL_INFO, EXPERIENCE } from '../constants';
 import { VDBLogo } from '../components/VDBLogo';
 import { db, auth, loginWithGoogle, logout } from '../lib/firebase';
 import { collection, doc, setDoc, getDocs, query, orderBy, limit, serverTimestamp } from 'firebase/firestore';
@@ -442,6 +446,9 @@ const NeuralLab = () => {
   // --- NODE 3: STRUCTURED OUTPUTS ---
   const [cvFocusInput, setCvFocusInput] = useState('A highly specialized node focus on building Generative AI pipelines and React-based Bauhaus interfaces.');
   const [isGeneratingCV, setIsGeneratingCV] = useState(false);
+  const [cvStyle, setCvStyle] = useState<'baudgrid' | 'indusmin' | 'cyberswiss'>('baudgrid');
+  const [injectCodyInfo, setInjectCodyInfo] = useState<boolean>(true);
+  const [isCopied, setIsCopied] = useState<boolean>(false);
   const [structuredCV, setStructuredCV] = useState<StructuredCV | null>({
     themeTitle: "Neural Architecture Focus",
     philosophyStatement: "SYSTEM EFFICIENCY & STRUCTURAL TRANSPARENCY OVER GRAPHIC DECORATIONS.",
@@ -955,56 +962,348 @@ const NeuralLab = () => {
                   </div>
 
                   {structuredCV && (
-                    <div className="border-4 border-black p-6 bg-stone-50 space-y-6">
-                      <div className="border-b-2 border-black pb-4 flex justify-between items-start">
-                        <div>
-                          <span className="text-[9px] font-black uppercase bg-black text-white px-2 py-0.5">ENFORCED SCHEMATIC</span>
-                          <h3 className="text-2xl font-black uppercase mt-1">Theme: {structuredCV.themeTitle}</h3>
+                    <div className="space-y-6 animate-fade-in">
+                      {/* --- DYNAMIC QR CODE NETWORKING INTERACTION --- */}
+                      <div className="no-print">
+                        <DynamicQRCodeCard defaultUrl="https://beacons.ai/cody.vdb" />
+                      </div>
+
+                      {/* --- EXPORT AND STYLING CONTROL PANEL (no-print) --- */}
+                      <div className="border-4 border-black p-6 bg-black text-white space-y-4 no-print">
+                        <div className="flex justify-between items-center border-b border-stone-800 pb-3">
+                          <span className="text-[10px] font-mono tracking-widest font-black text-bauhaus-yellow">
+                            [EXPORTS & TRANSMISSION GATEWAYS]
+                          </span>
+                          <span className="text-[9px] bg-red-600 text-white font-black px-2 py-0.5">
+                            SCHEMATIC GATEWAY V3.1
+                          </span>
                         </div>
-                        <span className="text-xs font-black uppercase bg-green-500 text-white px-2 py-1 border-2 border-black">
-                          Verified JSON Out
-                        </span>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {/* Left Columns: Style and Toggle */}
+                          <div className="space-y-4">
+                            <div>
+                              <label className="text-[11px] font-black uppercase tracking-wider block mb-2 text-stone-400">
+                                📐 CHỌN BỐ CỤC BAUSTYLE (LAYOUT PRESET)
+                              </label>
+                              <div className="grid grid-cols-3 gap-2">
+                                <button
+                                  onClick={() => setCvStyle('baudgrid')}
+                                  className={`p-2 border-2 border-white text-[10px] font-black uppercase tracking-tighter transition-all ${
+                                    cvStyle === 'baudgrid'
+                                      ? 'bg-bauhaus-red text-white border-bauhaus-red'
+                                      : 'bg-stone-900 text-stone-300 hover:bg-stone-800'
+                                  }`}
+                                >
+                                  BauGrid
+                                </button>
+                                <button
+                                  onClick={() => setCvStyle('indusmin')}
+                                  className={`p-2 border-2 border-white text-[10px] font-black uppercase tracking-tighter transition-all ${
+                                    cvStyle === 'indusmin'
+                                      ? 'bg-bauhaus-blue text-white border-bauhaus-blue'
+                                      : 'bg-stone-900 text-stone-300 hover:bg-stone-800'
+                                  }`}
+                                >
+                                  IndusMin
+                                </button>
+                                <button
+                                  onClick={() => setCvStyle('cyberswiss')}
+                                  className={`p-2 border-2 border-white text-[10px] font-black uppercase tracking-tighter transition-all ${
+                                    cvStyle === 'cyberswiss'
+                                      ? 'bg-bauhaus-yellow text-black border-bauhaus-yellow'
+                                      : 'bg-stone-900 text-stone-300 hover:bg-stone-800'
+                                  }`}
+                                >
+                                  CyberSwis
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Checkbox Toggle to Inject personal info */}
+                            <div className="flex items-center gap-3 bg-stone-900 p-3 border border-stone-800">
+                              <button
+                                onClick={() => setInjectCodyInfo(!injectCodyInfo)}
+                                className={`w-6 h-6 border-2 border-white flex items-center justify-center transition-all ${
+                                  injectCodyInfo ? 'bg-bauhaus-yellow text-black' : 'bg-transparent'
+                                }`}
+                              >
+                                {injectCodyInfo && <Check size={14} strokeWidth={3} />}
+                              </button>
+                              <div className="text-left">
+                                <span className="text-[10px] font-black tracking-tighter uppercase block text-white">
+                                  HỒ SƠ VÕ DUY BÌNH (coDY)
+                                </span>
+                                <span className="text-[9px] font-bold text-stone-400 block uppercase">
+                                  {injectCodyInfo ? 'ĐÃ NHÚNG TÀI NGUYÊN DANH DANH' : 'CHỈ XUẤT SKILLS QUY TRÌNH'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Right Columns: Multi-format Exporters */}
+                          <div className="flex flex-col justify-between">
+                            <div>
+                              <span className="text-[11px] font-black uppercase tracking-wider block mb-2 text-stone-400">
+                                📥 THỰC THI KHỞI CHẠY XUẤT CV (EXPORT PIPELINES)
+                              </span>
+                              <div className="grid grid-cols-2 gap-2">
+                                <button
+                                  onClick={() => generateCustomPDF(structuredCV, cvStyle, injectCodyInfo)}
+                                  className="bg-stone-900 hover:bg-stone-800 text-stone-200 border border-stone-700 p-3 text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2"
+                                >
+                                  <Download size={13} className="text-bauhaus-red" /> Tải tệp PDF
+                                </button>
+                                <button
+                                  onClick={() => downloadAsHTML(structuredCV, cvStyle, injectCodyInfo)}
+                                  className="bg-stone-900 hover:bg-stone-800 text-stone-200 border border-stone-700 p-3 text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2"
+                                >
+                                  <Download size={13} className="text-bauhaus-blue" /> Tải tệp HTML
+                                </button>
+                                <button
+                                  onClick={() => downloadAsMarkdown(structuredCV, injectCodyInfo)}
+                                  className="bg-stone-900 hover:bg-stone-800 text-stone-200 border border-stone-700 p-3 text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2"
+                                >
+                                  <Download size={13} className="text-bauhaus-yellow" /> Tải Markdown
+                                </button>
+                                <button
+                                  onClick={() => window.print()}
+                                  className="bg-stone-200 hover:bg-white text-black p-3 text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 border border-black"
+                                >
+                                  <Printer size={13} /> In Ấn Direct
+                                </button>
+                              </div>
+                            </div>
+
+                            <p className="text-[9px] font-bold text-stone-500 italic mt-3 uppercase text-right">
+                              * TIP: In trực tiếp (Ctrl+P) để có bản in sắc nét và hỗ trợ Tiếng Việt trọn vẹn nhất.
+                            </p>
+                          </div>
+                        </div>
                       </div>
 
-                      <div className="border-l-4 border-l-bauhaus-blue pl-4 py-1">
-                        <span className="text-[10px] font-black uppercase text-stone-600">Philosophy Statement</span>
-                        <p className="font-extrabold italic text-sm mt-1">{structuredCV.philosophyStatement}</p>
-                      </div>
+                      {/* --- INTERACTIVE ON-SCREEN CV PREVIEW CARD --- */}
+                      <div className={`p-6 md:p-8 space-y-6 text-black transition-all duration-300 ${
+                        cvStyle === 'baudgrid' ? 'border-4 border-black bg-stone-50' :
+                        cvStyle === 'indusmin' ? 'border border-slate-300 bg-white' :
+                        'border-l-[16px] border-l-red-600 border-y-4 border-r-4 border-black bg-white'
+                      }`}>
+                        
+                        {/* Title & Core Meta block */}
+                        <div className={`pb-4 flex justify-between items-start flex-wrap gap-4 ${
+                          cvStyle === 'indusmin' ? 'border-b border-slate-200' : 'border-b-2 border-black'
+                        }`}>
+                          <div>
+                            <span className="text-[9px] font-black uppercase bg-black text-white px-2 py-0.5">
+                              {injectCodyInfo ? 'VÕ DUY BÌNH (coDY)' : 'ENFORCED BESPOKE STYLE'}
+                            </span>
+                            <h3 className="text-xl sm:text-2xl font-black uppercase mt-1 tracking-tighter">
+                              Theme: {structuredCV.themeTitle}
+                            </h3>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-mono font-bold bg-[#eee] p-1 border border-stone-300 text-right uppercase">
+                              BAUSPEC_V3.12
+                            </span>
+                            <span className="text-xs font-black uppercase bg-green-500 text-white px-2 py-1 border border-black no-print">
+                              VERIFIED OUT
+                            </span>
+                          </div>
+                        </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Skills Box */}
-                        <div className="border-2 border-black p-4 bg-white">
-                          <span className="text-[10px] font-black uppercase opacity-55 block mb-3">Structured Skills Inventory</span>
-                          <div className="space-y-2">
-                            {structuredCV.technicalSkills?.map((skill, index) => (
-                              <div key={index} className="flex justify-between items-center hover:bg-stone-50 p-2 border-b border-black last:border-0">
-                                <div>
-                                  <h5 className="font-extrabold text-xs uppercase">{skill.title}</h5>
-                                  <span className="text-[8px] font-bold text-stone-500 uppercase">{skill.category}</span>
+                        {/* coDY Personal Info Banner Card (Optional block) */}
+                        {injectCodyInfo && (
+                          <div className="bg-black text-white p-4 font-mono text-[11px] grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 border-2 border-black">
+                            <div><strong className="text-bauhaus-yellow">EMAIL:</strong> {PERSONAL_INFO.email}</div>
+                            <div><strong className="text-bauhaus-blue">PHONE/ZALO:</strong> {PERSONAL_INFO.phone}</div>
+                            <div><strong className="text-bauhaus-red">BIRTHDAY:</strong> {PERSONAL_INFO.birthday}</div>
+                            <div className="sm:col-span-2 md:col-span-3">
+                              <strong className="text-stone-400">GITHUB / SOCIALS:</strong> {PERSONAL_INFO.socials.github} | {PERSONAL_INFO.socials.beacons}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Philosophy Section */}
+                        <div className={`pl-4 py-1 ${
+                          cvStyle === 'baudgrid' ? 'border-l-4 border-l-bauhaus-blue' :
+                          cvStyle === 'indusmin' ? 'border-l-2 border-l-stone-400' :
+                          'border-l-4 border-l-bauhaus-yellow'
+                        }`}>
+                          <span className="text-[9px] font-black uppercase text-stone-600 block">[Philosophy Statement]</span>
+                          <p className="font-extrabold italic text-xs sm:text-sm mt-0.5 uppercase tracking-tight text-stone-800">
+                            {structuredCV.philosophyStatement}
+                          </p>
+                        </div>
+
+                        {/* Core content grid: Custom synthesized CV stats */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {/* Technical Focus Skills Box */}
+                          <div className="border-2 border-black p-4 bg-white">
+                            <span className="text-[10px] font-black uppercase opacity-65 block mb-3 border-b border-black pb-1">
+                              🛠️ BESPOKE SKILLS MATRIX
+                            </span>
+                            <div className="space-y-2">
+                              {structuredCV.technicalSkills?.map((skill, index) => (
+                                <div key={index} className="flex justify-between items-center hover:bg-stone-50 p-2 border-b border-stone-200 last:border-0">
+                                  <div className="text-left">
+                                    <h5 className="font-extrabold text-xs uppercase">{skill.title}</h5>
+                                    <span className="text-[8px] font-bold text-stone-500 uppercase">{skill.category}</span>
+                                  </div>
+                                  <span className="font-black text-xs text-bauhaus-blue">{skill.competency}</span>
                                 </div>
-                                <span className="font-black text-xs text-bauhaus-blue">{skill.competency}</span>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Grid Manifesto Box */}
+                          <div className="grid grid-cols-1 gap-2">
+                            <span className="text-[10px] font-black uppercase opacity-65 block mb-1 text-left">
+                              ⛓️ PROTOCOL BLUEPRINT NODES
+                            </span>
+                            {structuredCV.gridManifesto?.map((man, i) => (
+                              <div 
+                                key={i} 
+                                className={`border-2 border-black p-3 text-black flex flex-col justify-between text-left ${
+                                  man.accentColor === 'bauhaus-red' ? 'bg-bauhaus-red/5' :
+                                  man.accentColor === 'bauhaus-blue' ? 'bg-bauhaus-blue/5' : 'bg-bauhaus-yellow/5'
+                                }`}
+                              >
+                                <span className="text-[8px] font-black uppercase tracking-widest opacity-60">ID: {man.nodeId}</span>
+                                <div>
+                                  <h5 className="font-black text-xs uppercase mt-0.5">{man.label}</h5>
+                                  <p className="text-[10px] font-bold mt-0.5 text-stone-800">{man.value}</p>
+                                </div>
                               </div>
                             ))}
                           </div>
                         </div>
 
-                        {/* Grid Manifesto Box */}
-                        <div className="grid grid-cols-1 gap-2">
-                          {structuredCV.gridManifesto?.map((man, i) => (
-                            <div 
-                              key={i} 
-                              className={`border-2 border-black p-4 text-black flex flex-col justify-between ${
-                                man.accentColor === 'bauhaus-red' ? 'bg-bauhaus-red/10' :
-                                man.accentColor === 'bauhaus-blue' ? 'bg-bauhaus-blue/10' : 'bg-bauhaus-yellow/10'
-                              }`}
-                            >
-                              <span className="text-[8px] font-black uppercase tracking-widest opacity-60">ID: {man.nodeId}</span>
-                              <div>
-                                <h5 className="font-black text-xs uppercase mt-1">{man.label}</h5>
-                                <p className="text-[11px] font-bold mt-1 text-stone-800">{man.value}</p>
+                        {/* coDYN academic background & timeline block (Optional block) */}
+                        {injectCodyInfo && (
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-stone-200">
+                            {/* Academic Detail block */}
+                            <div className="border-2 border-black p-4 bg-[#ff0]/5 text-left md:col-span-1">
+                              <span className="text-[9px] font-black uppercase block text-stone-500">[EDUCATION]</span>
+                              <h4 className="font-black text-xs uppercase mt-1">HOA SEN UNIVERSITY</h4>
+                              <p className="text-[11px] font-bold mt-1">Software Technology (Công nghệ Phần mềm)</p>
+                              <span className="text-[8px] font-mono text-stone-500 block mt-2">
+                                IELTS: 6.0 | HSK: 3 | JLPT: N5
+                              </span>
+                            </div>
+
+                            {/* Brief Professional Timeline of coDY */}
+                            <div className="border-2 border-black p-4 bg-white text-left md:col-span-2">
+                              <span className="text-[9px] font-black uppercase block text-stone-500">[RELEVANT EXPERIENCE TIME-LOG]</span>
+                              <div className="mt-2 space-y-2">
+                                {EXPERIENCE.slice(0, 3).map((exp, idx) => (
+                                  <div key={idx} className="border-b border-stone-100 pb-2 last:border-0">
+                                    <div className="flex justify-between items-center flex-wrap">
+                                      <h5 className="font-black text-xs uppercase text-stone-800">{exp.role}</h5>
+                                      <span className="text-[8px] font-black bg-stone-100 p-0.5">{exp.period}</span>
+                                    </div>
+                                    <span className="text-[9px] font-extrabold text-stone-500 uppercase">{exp.company}</span>
+                                  </div>
+                                ))}
                               </div>
                             </div>
-                          ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* --- HIDDEN DETAILED PRINT-ONLY PAGE-FILLING CONTAINER --- */}
+                      <div className="print-only p-12 bg-white text-black font-sans leading-relaxed text-left max-w-4xl mx-auto space-y-6">
+                        <div className="border-b-4 border-black pb-4 flex justify-between items-end">
+                          <div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-red-600">[VERIFIED SYSTEM CV]</span>
+                            <h1 className="text-4xl font-black tracking-tight mt-1 uppercase">
+                              {injectCodyInfo ? PERSONAL_INFO.fullName : 'BESPOKE PORTFOLIO CV'}
+                            </h1>
+                            <h2 className="text-lg font-bold text-blue-800 uppercase mt-1">
+                              {structuredCV.themeTitle}
+                            </h2>
+                          </div>
+                          
+                          <div className="text-right font-mono text-xs">
+                            BAUHAUS VDB SPEC SYSTEM V3.12<br/>
+                            SERIAL_GATEWAY_NODE_{Math.floor(Math.random() * 90000 + 10000)}
+                          </div>
+                        </div>
+
+                        {injectCodyInfo && (
+                          <div className="border border-black p-4 bg-[#f9f9f9] grid grid-cols-2 gap-2 text-xs font-mono">
+                            <div><strong>EMAIL:</strong> {PERSONAL_INFO.email}</div>
+                            <div><strong>PHONE/ZALO:</strong> {PERSONAL_INFO.phone}</div>
+                            <div><strong>BIRTHDAY:</strong> {PERSONAL_INFO.birthday}</div>
+                            <div><strong>LOCATION:</strong> HO CHI MINH CITY, VIETNAM</div>
+                            <div className="col-span-2"><strong>GITHUB/PORTFOLIO:</strong> {PERSONAL_INFO.socials.github} | {PERSONAL_INFO.socials.beacons}</div>
+                          </div>
+                        )}
+
+                        <div className="border-l-4 border-l-blue-600 pl-4 py-1 italic font-bold">
+                          <span className="text-[9px] font-bold text-gray-500 uppercase">[Philosophy Statement]</span>
+                          <p className="text-sm mt-1 uppercase tracking-tight">"{structuredCV.philosophyStatement}"</p>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-8">
+                          <div>
+                            <h3 className="text-lg font-black border-b-2 border-black pb-1 mb-3 uppercase">🛠️ TECHNOLOGICAL FOCUS SKILLS</h3>
+                            <div className="space-y-2">
+                              {structuredCV.technicalSkills?.map((skill, index) => (
+                                <div key={index} className="flex justify-between items-center border-b border-gray-200 py-1">
+                                  <div>
+                                    <span className="font-bold text-sm uppercase block">{skill.title}</span>
+                                    <span className="text-[9px] text-gray-500 uppercase font-mono block">{skill.category}</span>
+                                  </div>
+                                  <span className="font-black text-sm text-blue-600">{skill.competency}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div>
+                            <h3 className="text-lg font-black border-b-2 border-black pb-1 mb-3 uppercase">⛓️ SYSTEM MANIFESTO ELEMENTS</h3>
+                            <div className="space-y-3">
+                              {structuredCV.gridManifesto?.map((man, i) => (
+                                <div key={i} className="border border-gray-200 p-2 bg-[#fafafa]">
+                                  <span className="text-[8px] font-mono text-gray-500 block">NODE: {man.nodeId}</span>
+                                  <h4 className="font-bold text-xs uppercase">{man.label}</h4>
+                                  <p className="text-[10px] text-gray-700 mt-1">{man.value}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {injectCodyInfo && (
+                          <div className="space-y-4 pt-4 border-t border-gray-300">
+                            <div>
+                              <h3 className="text-lg font-black border-b-2 border-black pb-1 mb-3 uppercase font-sans">🏫 EDUCATIONAL BACKGROUND</h3>
+                              <p className="font-bold text-sm text-gray-800">HOA SEN UNIVERSITY — SOFTWARE TECHNOLOGY</p>
+                              <p className="text-xs text-gray-600 font-mono mt-1">Languages Config: {PERSONAL_INFO.languages.join(' / ')}</p>
+                            </div>
+
+                            <div>
+                              <h3 className="text-lg font-black border-b-2 border-black pb-1 mb-3 uppercase font-sans">💼 INDUSTRY EXPERIENCE TIMELINE</h3>
+                              <div className="space-y-3 font-sans">
+                                {EXPERIENCE.slice(0, 4).map((exp, idx) => (
+                                  <div key={idx} className="border border-gray-200 p-3 bg-white">
+                                    <div className="flex justify-between items-center">
+                                      <span className="font-bold text-sm text-blue-800">{exp.role.toUpperCase()}</span>
+                                      <span className="text-xs font-mono font-bold bg-gray-100 px-2 py-0.5">{exp.period}</span>
+                                    </div>
+                                    <span className="font-bold text-xs text-red-600 block mt-0.5">{exp.company.toUpperCase()}</span>
+                                    <p className="text-xs mt-1 text-gray-700 leading-relaxed">{exp.description}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="pt-6 border-t border-black flex justify-between text-[10px] text-gray-500 font-mono">
+                          <span>SYSTEM INTEGRITY CONTROL V3.12 - FORM FOLLOWS FUNCTION</span>
+                          <span>VÕ DUY BÌNH // coDY</span>
                         </div>
                       </div>
                     </div>

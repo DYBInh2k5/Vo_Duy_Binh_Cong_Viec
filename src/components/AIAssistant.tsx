@@ -19,6 +19,19 @@ const AIAssistant = () => {
     }
   }, [messages]);
 
+  useEffect(() => {
+    const handleOpen = () => setIsOpen(true);
+    const handleToggle = () => setIsOpen(prev => !prev);
+
+    window.addEventListener('open-ai-assistant', handleOpen);
+    window.addEventListener('toggle-ai-assistant', handleToggle);
+
+    return () => {
+      window.removeEventListener('open-ai-assistant', handleOpen);
+      window.removeEventListener('toggle-ai-assistant', handleToggle);
+    };
+  }, []);
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 

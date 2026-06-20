@@ -8,6 +8,13 @@ import { ThemeProvider } from './context/ThemeContext';
 import { useRemoteConfig } from './hooks/useRemoteConfig';
 import { AlertTriangle } from 'lucide-react';
 import PushNotificationManager from './components/PushNotificationManager';
+import { CommandPalette } from './components/CommandPalette';
+import { useTracking } from './hooks/useTracking';
+
+const AnalyticsTracker: React.FC = () => {
+  useTracking();
+  return null;
+};
 
 // Lazy load pages for performance
 const Home = React.lazy(() => import('./pages/Home'));
@@ -46,6 +53,7 @@ function App() {
   return (
     <ThemeProvider>
       <Router>
+        <AnalyticsTracker />
         <CustomCursor />
         <BackgroundDynamics />
         <div className="flex flex-col min-h-screen transition-all duration-500">
@@ -79,6 +87,7 @@ function App() {
         <PushNotificationManager />
         <Suspense fallback={null}>
           <AIAssistant />
+          <CommandPalette />
         </Suspense>
       </div>
     </Router>

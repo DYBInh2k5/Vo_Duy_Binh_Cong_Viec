@@ -96,6 +96,16 @@ service cloud.firestore {
              data.timestamp is timestamp;
     }
 
+    function isValidPageView(data) {
+      return data.keys().hasAll(['pagePath', 'pageTitle', 'timestamp', 'sessionId', 'referrer']) &&
+             data.keys().size() == 5 &&
+             data.pagePath is string && data.pagePath.size() <= 300 &&
+             data.pageTitle is string && data.pageTitle.size() <= 300 &&
+             data.timestamp == request.time &&
+             data.sessionId is string && data.sessionId.size() <= 128 &&
+             data.referrer is string && data.referrer.size() <= 1000;
+    }
+
     // --- Collections ---
 
     match /system_logs/{logId} {
@@ -142,6 +152,11 @@ service cloud.firestore {
 
     match /contacts/{contactId} {
       allow create: if isValidId(contactId) && isValidContactMessage(incoming());
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /page_views/{viewId} {
+      allow create: if isValidId(viewId) && isValidPageView(incoming());
       allow read, update, delete: if isAdmin();
     }
 

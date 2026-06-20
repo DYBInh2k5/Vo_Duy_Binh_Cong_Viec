@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import { Database, Zap, Cpu, Activity, Github, Globe, Server, TrendingUp, TrendingDown } from 'lucide-react';
+import { Database, Zap, Cpu, Activity, Github, Globe, Server, TrendingUp, TrendingDown, Eye, FileSpreadsheet, ListFilter } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { db } from '../lib/firebase';
+import { collection, getDocs } from 'firebase/firestore';
 
 const data = [
   { name: '00:00', traffic: 400 },
@@ -27,6 +29,13 @@ const Dashboard = () => {
     followers: 156
   });
 
+  const [trackingStats, setTrackingStats] = useState<{
+    totalViews: number;
+    uniqueSessions: number;
+    topPages: { path: string; count: number }[];
+    recentLogs: { id: string; path: string; title: string; time: string; sessionId: string }[];
+  } | null>(null);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setStats(prev => ({
@@ -36,6 +45,74 @@ const Dashboard = () => {
         nodes: 8
       }));
     }, 3000);
+
+    const fetchTracking = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'page_views'));
+        const docs = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as any[];
+
+        if (docs.length > 0) {
+          // Sort client-side by timestamp to be absolutely robust and index-free
+          docs.sort((a, b) => {
+            const timeA = a.timestamp?.seconds || 0;
+            const timeB = b.timestamp?.seconds || 0;
+            return timeB - timeA; // Descending
+          });
+
+          const totalViews = docs.length;
+
+          // Calculate unique sessions
+          const sessionIds = new Set(docs.map(d => d.sessionId).filter(Boolean));
+          const uniqueSessions = sessionIds.size;
+
+          // Calculate top views per page path
+          const counts: Record<string, number> = {};
+          docs.forEach(d => {
+            if (d.pagePath) {
+              counts[d.pagePath] = (counts[d.pagePath] || 0) + 1;
+            }
+          });
+          const topPages = Object.entries(counts)
+            .map(([path, count]) => ({ path, count }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 5);
+
+          // Get recent 5 logs
+          const recentLogs = docs.slice(0, 5).map(d => {
+            let logTime = '';
+            if (d.timestamp?.toDate) {
+              logTime = d.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            } else if (d.timestamp?.seconds) {
+              logTime = new Date(d.timestamp.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            } else {
+              logTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            }
+
+            return {
+              id: d.id,
+              path: d.pagePath || '/',
+              title: d.pageTitle || 'coDY Gateway',
+              time: logTime,
+              sessionId: d.sessionId || 'anonymous'
+            };
+          });
+
+          setTrackingStats({
+            totalViews,
+            uniqueSessions,
+            topPages,
+            recentLogs
+          });
+        }
+      } catch (err) {
+        console.warn('[Telemetry] Error loading analytics logs:', err);
+      }
+    };
+
+    fetchTracking();
 
     // Simulated GitHub API Fetch
     const fetchGithub = async () => {
@@ -62,13 +139,15 @@ const Dashboard = () => {
         <div className="h-2 w-full bg-black"></div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-16">
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-8 mb-16">
         {/* Real-time Telemetry */}
-        <div className="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="xl:col-span-3 grid grid-cols-2 md:grid-cols-6 gap-4">
           <StatCard icon={<Cpu />} label="CPU LOAD" value={`${stats.cpu}%`} color="bg-bauhaus-yellow" trend={<TrendingUp size={12} className="text-bauhaus-red" />} />
           <StatCard icon={<Database />} label="MEM UTIL" value={`${stats.mem}%`} color="bg-bauhaus-blue text-white" trend={<TrendingDown size={12} className="text-white" />} />
           <StatCard icon={<Activity />} label="LATENCY" value={`${stats.latency}ms`} color="bg-bauhaus-red text-white" />
           <StatCard icon={<Server />} label="NODES" value={stats.nodes} color="bg-black text-white" />
+          <StatCard icon={<Eye size={16} />} label="SYS HITS" value={trackingStats ? trackingStats.totalViews : '0'} color="bg-white text-black" trend={<TrendingUp size={12} className="text-bauhaus-red" />} />
+          <StatCard icon={<Globe size={16} />} label="SESSIONS" value={trackingStats ? trackingStats.uniqueSessions : '0'} color="bg-bauhaus-yellow text-black" />
         </div>
 
         {/* Global Status */}
@@ -137,6 +216,89 @@ const Dashboard = () => {
                <p className="text-[10px] font-black uppercase italic opacity-40 leading-tight">Last sync: T+0.04s via Bauhaus Middleware</p>
             </div>
          </div>
+      </div>
+
+      {/* Firebase Page View Tracking Analytics */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
+        <div className="lg:col-span-6 border-4 border-black p-8 bg-white hard-shadow">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="p-2 bg-bauhaus-red text-white border-2 border-black">
+              <Eye size={20} />
+            </div>
+            <div>
+              <h2 className="text-xl font-black uppercase tracking-tighter">NAVIGATION SECTOR DEMAND</h2>
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">REAL-TIME PORTFOLIO USER INTEREST ANALYSIS</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {trackingStats ? (
+              trackingStats.topPages.map((page, idx) => {
+                const maxCount = trackingStats.topPages[0]?.count || 1;
+                const percentage = Math.round((page.count / maxCount) * 100);
+                // Assign a Bauhaus accent color depending on rank
+                const colors = ['bg-bauhaus-red text-white', 'bg-bauhaus-blue text-white', 'bg-bauhaus-yellow text-black', 'bg-black text-white', 'bg-stone-400 text-black'];
+                const accentColor = colors[idx % colors.length] || 'bg-black text-white';
+
+                return (
+                  <div key={idx} className="space-y-1">
+                    <div className="flex justify-between items-end font-mono text-xs">
+                      <span className="font-black uppercase tracking-tight truncate max-w-[70%]">
+                        {idx + 1}. {page.path}
+                      </span>
+                      <span className="font-bold text-gray-400 italic">
+                        {page.count} views ({percentage}%)
+                      </span>
+                    </div>
+                    <div className="h-4 w-full bg-stone-100 border-2 border-black overflow-hidden relative">
+                      <div 
+                        className={`h-full border-r-2 border-black ${accentColor}`} 
+                        style={{ width: `${percentage}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="p-8 text-center border-2 border-dashed border-stone-400 font-mono text-xs text-stone-500">
+                AWAITING ANALYTICS INGESTION...
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="lg:col-span-6 border-4 border-black p-8 bg-white hard-shadow">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="p-2 bg-bauhaus-blue text-white border-2 border-black">
+              <FileSpreadsheet size={20} />
+            </div>
+            <div>
+              <h2 className="text-xl font-black uppercase tracking-tighter">LIVE METADATA FEED</h2>
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">LATEST ACTIVE FIREBASE DOCUMENT ENTRIES</p>
+            </div>
+          </div>
+
+          <div className="space-y-2 font-mono text-xs overflow-y-auto max-h-[220px] pr-2 custom-scrollbar">
+            {trackingStats && trackingStats.recentLogs.length > 0 ? (
+              trackingStats.recentLogs.map((log) => (
+                <div key={log.id} className="border-2 border-black bg-white p-3 flex flex-col justify-between hover:scale-[1.01] transition-transform">
+                  <div className="flex justify-between items-start font-black text-[10px] mb-1">
+                    <span className="text-bauhaus-blue truncate max-w-[65%] uppercase">{log.title}</span>
+                    <span className="bg-bauhaus-yellow px-1 border border-black shrink-0 text-[9px]">{log.time}</span>
+                  </div>
+                  <div className="flex justify-between text-[11px] text-stone-600">
+                    <span className="font-bold truncate max-w-[60%]">{log.path}</span>
+                    <span className="text-gray-400 text-[9px] shrink-0 truncate max-w-[35%]">ID: {log.sessionId}</span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="p-8 text-center border-2 border-dashed border-stone-400 font-mono text-xs text-stone-500">
+                SYS CONNECTION ACTIVE - LOGS EMPTY
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* GitHub Activity Bauhaus Grid */}

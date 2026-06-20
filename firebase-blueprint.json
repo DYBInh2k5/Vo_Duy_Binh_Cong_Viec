@@ -118,6 +118,19 @@
         "timestamp": { "type": "string", "format": "date-time" }
       },
       "required": ["task", "timestamp"]
+    },
+    "PageView": {
+      "title": "Page View",
+      "description": "Tracking logs of page navigation events for analytics",
+      "type": "object",
+      "properties": {
+        "pagePath": { "type": "string" },
+        "pageTitle": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "sessionId": { "type": "string" },
+        "referrer": { "type": "string" }
+      },
+      "required": ["pagePath", "pageTitle", "timestamp", "sessionId", "referrer"]
     }
   },
   "firestore": {
@@ -156,6 +169,10 @@
     "/guestbook/{entryId}": {
       "schema": "GuestbookEntry",
       "description": "Public messages from visiting users"
+    },
+    "/page_views/{viewId}": {
+      "schema": "PageView",
+      "description": "Tracking logs of page navigation events for analytics"
     },
     "/admins/{uid}": {
       "schema": { "type": "object", "properties": { "role": { "type": "string" } } },
