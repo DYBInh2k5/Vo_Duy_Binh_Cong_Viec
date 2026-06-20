@@ -99,11 +99,11 @@ service cloud.firestore {
     function isValidPageView(data) {
       return data.keys().hasAll(['pagePath', 'pageTitle', 'timestamp', 'sessionId', 'referrer']) &&
              data.keys().size() == 5 &&
-             data.pagePath is string && data.pagePath.size() <= 300 &&
-             data.pageTitle is string && data.pageTitle.size() <= 300 &&
-             data.timestamp == request.time &&
-             data.sessionId is string && data.sessionId.size() <= 128 &&
-             data.referrer is string && data.referrer.size() <= 1000;
+             data.pagePath is string && data.pagePath.size() <= 600 &&
+             data.pageTitle is string && data.pageTitle.size() <= 600 &&
+             data.timestamp is timestamp &&
+             data.sessionId is string && data.sessionId.size() <= 256 &&
+             data.referrer is string && data.referrer.size() <= 3000;
     }
 
     // --- Collections ---

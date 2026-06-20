@@ -661,6 +661,69 @@ async function startServer() {
     }
   });
 
+  // NODE 16: Multichannel Media Script Automated Pipeline
+  app.post("/api/gemini/media-script", async (req, res) => {
+    const { topic, tone, platform, visualLayout } = req.body;
+    try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) throw new Error("GEMINI_API_KEY is not configured.");
+
+      const { GoogleGenAI, Type } = await import("@google/genai");
+      const ai = new GoogleGenAI({ apiKey });
+
+      const prompt = `You are an expert Media Script Director and creative audiovisual automation engine.
+      Compose a fully detailed, high-engagement video storyboard and spoken word script matching:
+      - Topic/Keywords: "${topic}"
+      - Targeted platform: "${platform}"
+      - Cinematic aesthetic tone: "${tone}"
+      - Screen Visual Layout: "${visualLayout}"
+
+      The output script must have between 3 to 5 scenes, optimized to fit within standard shorts/reel/long video durations.
+      For each scene, structure clear instructions on what must be rendered on screen (visualCue), the background sound design beats (audioCue), and the spoken lines (spokenScript) which will be read on a teleprompter.
+      Make sure to customize the output precisely based on Võ Duy Bình's aesthetic preferences of Bauhaus Brutalism and technical efficiency.`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              title: { type: Type.STRING },
+              videoTopic: { type: Type.STRING },
+              visualTheme: { type: Type.STRING },
+              estimatedDuration: { type: Type.STRING },
+              productionNotes: { type: Type.STRING },
+              scenes: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    sceneNumber: { type: Type.INTEGER },
+                    duration: { type: Type.STRING, description: "e.g. '4s' or '5 seconds'" },
+                    visualCue: { type: Type.STRING, description: "Detailed visual commands" },
+                    audioCue: { type: Type.STRING, description: "Acoustics, sound design, sound fx instructions" },
+                    spokenScript: { type: Type.STRING, description: "Exact words to speak out loud" }
+                  },
+                  required: ["sceneNumber", "duration", "visualCue", "audioCue", "spokenScript"]
+                }
+              }
+            },
+            required: ["title", "videoTopic", "visualTheme", "estimatedDuration", "productionNotes", "scenes"]
+          }
+        }
+      });
+
+      const text = response.text || "{}";
+      res.json(JSON.parse(text));
+    } catch (err: any) {
+      console.warn("Media script keyless bypass triggered:", err);
+      // Fallback matching logic is handled gracefully in client component side
+      res.status(500).json({ error: "Bypass triggered" });
+    }
+  });
+
   // NODE 15: Secure Chat Proxy for Portfolio Assistant
   app.post("/api/gemini/chat", async (req, res) => {
     const { messages } = req.body;

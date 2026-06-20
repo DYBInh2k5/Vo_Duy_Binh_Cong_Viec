@@ -181,6 +181,18 @@ export const CommandPalette: React.FC = () => {
       action: () => navigate('/dashboard'),
       icon: <Sparkles size={14} className="text-bauhaus-yellow" />
     },
+    {
+      id: 'nav-media-script',
+      category: 'AI METADATA LABS',
+      title: '13. Media Script Architect [Kịch Bản Media AI]',
+      description: 'Generates optimized multicuts storyboard and written video script outlines',
+      action: () => {
+        sessionStorage.setItem('preferredActiveNode', '15');
+        navigate('/neurallab');
+        window.dispatchEvent(new CustomEvent('change-active-node', { detail: 15 }));
+      },
+      icon: <Sparkles size={14} className="text-bauhaus-yellow" />
+    },
 
     // System Utilities
     {

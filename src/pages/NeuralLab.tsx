@@ -15,6 +15,7 @@ import { collection, doc, setDoc, getDocs, query, orderBy, limit, serverTimestam
 import { handleFirestoreError, OperationType } from '../lib/firestoreUtils';
 import NeuralTranslationCompiler from '../components/NeuralTranslationCompiler';
 import NeuralCodeDeconstructor from '../components/NeuralCodeDeconstructor';
+import NeuralScriptArchitect from '../components/NeuralScriptArchitect';
 
 interface GroundingSource {
   title: string;
@@ -30,7 +31,25 @@ interface StructuredCV {
 
 const NeuralLab = () => {
   // Global Active Node State
-  const [activeNode, setActiveNode] = useState<number>(1);
+  const [activeNode, setActiveNode] = useState<number>(() => {
+    const saved = sessionStorage.getItem('preferredActiveNode');
+    if (saved) {
+      sessionStorage.removeItem('preferredActiveNode');
+      return parseInt(saved, 10);
+    }
+    return 1;
+  });
+
+  useEffect(() => {
+    const handleNodeChange = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (typeof detail === 'number') {
+        setActiveNode(detail);
+      }
+    };
+    window.addEventListener('change-active-node', handleNodeChange);
+    return () => window.removeEventListener('change-active-node', handleNodeChange);
+  }, []);
 
   // --- NODE 1: MULTIMODAL LIVE AUDIO ---
   const [liveConnected, setLiveConnected] = useState(false);
@@ -631,7 +650,7 @@ const NeuralLab = () => {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            {[1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14].map((num) => (
+            {[1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map((num) => (
               <button
                 key={num}
                 onClick={() => setActiveNode(num)}
@@ -670,7 +689,8 @@ const NeuralLab = () => {
                 { id: 11, tag: 'NODE 11', title: 'Efficiency Metrics', color: 'bg-bauhaus-yellow text-black', desc: 'Granular comparison charts of traditional vs AI-optimized pipelines' },
                 { id: 12, tag: 'NODE 12', title: 'AI System Log', color: 'bg-black text-white', desc: 'Short-form protocol notes tracking model trends and system telemetry' },
                 { id: 13, tag: 'NODE 13', title: 'Locales Compiler', color: 'bg-bauhaus-blue text-white', desc: 'Free high-fidelity Gemini translation compiling dynamic EN/VI i18next structures' },
-                { id: 14, tag: 'NODE 14', title: 'Refactor Tunnel', color: 'bg-bauhaus-red text-white', desc: 'Sparsity optimizer stripping loose boilerplate or redundant calculations' }
+                { id: 14, tag: 'NODE 14', title: 'Refactor Tunnel', color: 'bg-bauhaus-red text-white', desc: 'Sparsity optimizer stripping loose boilerplate or redundant calculations' },
+                { id: 15, tag: 'NODE 15', title: 'Script Architect', color: 'bg-bauhaus-yellow text-black', desc: 'Custom multichannel storyboard and speech flow optimizer' }
               ].map((node) => (
                 <button
                   key={node.id}
@@ -2388,6 +2408,10 @@ const NeuralLab = () => {
 
             {activeNode === 14 && (
               <NeuralCodeDeconstructor />
+            )}
+
+            {activeNode === 15 && (
+              <NeuralScriptArchitect />
             )}
 
           </AnimatePresence>

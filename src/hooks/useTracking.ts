@@ -20,10 +20,11 @@ export const useTracking = () => {
 
   useEffect(() => {
     const handlePageView = async () => {
-      const pagePath = location.pathname;
-      const pageTitle = document.title || 'coDY Portfolio';
-      const sessionId = getSessionId();
-      const referrer = typeof document !== 'undefined' ? document.referrer || 'none' : 'none';
+      const pagePath = location.pathname.substring(0, 500);
+      const pageTitle = (document.title || 'coDY Portfolio').substring(0, 500);
+      const sessionId = getSessionId().substring(0, 200);
+      const rawReferrer = typeof document !== 'undefined' ? document.referrer || 'none' : 'none';
+      const referrer = rawReferrer.substring(0, 2500);
 
       // Generate a clean valid document ID
       const viewId = 'view_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
